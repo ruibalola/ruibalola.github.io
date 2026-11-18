@@ -20,6 +20,7 @@
 
     <!-- DATALISTS PARA AUTOCOMPLETE COM VALORES EXISTENTES -->
     <datalist id="services-datalist"></datalist>
+    <datalist id="marcas-datalist"></datalist>
     <datalist id="boxes-datalist"></datalist>
     <datalist id="prices-datalist"></datalist>
 
@@ -135,6 +136,11 @@
                         <i class="fa-solid fa-file-pdf text-red-400"></i> <span class="hidden md:inline">PDF</span>
                     </button>
 
+                    <!-- Template WhatsApp -->
+                    <button onclick="openWhatsappTemplateModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700" title="Configurar Template WhatsApp">
+                        <i class="fa-brands fa-whatsapp text-emerald-400"></i> <span class="hidden lg:inline">Template WhatsApp</span>
+                    </button>
+
                     <!-- Minha Senha -->
                     <button onclick="openChangeMyPasswordModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700" title="Alterar a Minha Senha">
                         <i class="fa-solid fa-key text-yellow-400"></i> <span class="hidden lg:inline">Minha Senha</span>
@@ -231,7 +237,7 @@
                         <thead>
                             <tr class="bg-slate-950/80 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                                 <th class="p-4">Cliente / Contacto</th>
-                                <th class="p-4">Serviço / Box</th>
+                                <th class="p-4">Serviço / Equipamento</th>
                                 <th class="p-4">Acessos (User / Senha)</th>
                                 <th class="p-4">Link / Painel</th>
                                 <th class="p-4">Valor</th>
@@ -388,15 +394,21 @@
                     </div>
                 </div>
 
-                <!-- Serviço & Box (Ambos com Autocomplete) -->
+                <!-- Tipo de Serviço TV -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Tipo de Serviço TV *</label>
+                    <input type="text" id="c-service" list="services-datalist" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: IPTV Premium (sugestões)">
+                </div>
+
+                <!-- Marca & Dispositivo / Box (Ambos com Autocomplete) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Tipo de Serviço TV *</label>
-                        <input type="text" id="c-service" list="services-datalist" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: IPTV Premium (sugestões)">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Marca Equipamento</label>
+                        <input type="text" id="c-marca" list="marcas-datalist" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: Xiaomi, Samsung, Apple, Formuler...">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Dispositivo / Box TV</label>
-                        <input type="text" id="c-box" list="boxes-datalist" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: Formuler, FireStick, Mag...">
+                        <input type="text" id="c-box" list="boxes-datalist" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: Mi Box S, FireStick, Mag...">
                     </div>
                 </div>
 
@@ -564,6 +576,79 @@
                     <div class="flex gap-2">
                         <button type="button" onclick="closeConfigModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
                         <button type="button" onclick="saveSupabaseConfig()" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20">Guardar & Conectar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 8: TEMPLATE DE MENSAGEM WHATSAPP -->
+    <div id="whatsapp-template-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-8">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                <div class="flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-emerald-400 text-xl"></i>
+                    <h3 class="font-bold text-base sm:text-lg text-white">Template de Mensagem WhatsApp</h3>
+                </div>
+                <button onclick="closeWhatsappTemplateModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-5 sm:p-6 space-y-4">
+                <div>
+                    <p class="text-xs text-slate-300 mb-2">
+                        Personalize a mensagem automática enviada ao cliente ao clicar no ícone do WhatsApp.
+                        Clique nas etiquetas abaixo para inserir variáveis dinâmicas no texto:
+                    </p>
+                    <!-- Etiquetas dinâmicas clicáveis -->
+                    <div class="flex flex-wrap gap-1.5 p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
+                        <button type="button" onclick="insertWaTag('{nome}')" class="px-2 py-1 bg-slate-900 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-lg text-xs font-mono transition" title="Nome do cliente">{nome}</button>
+                        <button type="button" onclick="insertWaTag('{servico}')" class="px-2 py-1 bg-slate-900 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-lg text-xs font-mono transition" title="Tipo de serviço TV">{servico}</button>
+                        <button type="button" onclick="insertWaTag('{marca}')" class="px-2 py-1 bg-slate-900 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-lg text-xs font-mono transition" title="Marca do equipamento">{marca}</button>
+                        <button type="button" onclick="insertWaTag('{box}')" class="px-2 py-1 bg-slate-900 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-lg text-xs font-mono transition" title="Dispositivo / Box TV">{box}</button>
+                        <button type="button" onclick="insertWaTag('{valor}')" class="px-2 py-1 bg-slate-900 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-lg text-xs font-mono transition" title="Valor a pagar em euros">{valor}</button>
+                        <button type="button" onclick="insertWaTag('{vencimento}')" class="px-2 py-1 bg-slate-900 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-lg text-xs font-mono transition" title="Data do próximo pagamento">{vencimento}</button>
+                        <button type="button" onclick="insertWaTag('{user}')" class="px-2 py-1 bg-slate-900 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-lg text-xs font-mono transition" title="Nome de utilizador do cliente">{user}</button>
+                        <button type="button" onclick="insertWaTag('{pass}')" class="px-2 py-1 bg-slate-900 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-lg text-xs font-mono transition" title="Palavra-passe de acesso">{pass}</button>
+                        <button type="button" onclick="insertWaTag('{link}')" class="px-2 py-1 bg-slate-900 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-lg text-xs font-mono transition" title="Link / Painel / M3U">{link}</button>
+                        <button type="button" onclick="insertWaTag('{obs}')" class="px-2 py-1 bg-slate-900 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-lg text-xs font-mono transition" title="Observações ou notas">{obs}</button>
+                    </div>
+                </div>
+
+                <!-- Modelos rápidos / Presets -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-[11px] text-slate-400 font-medium">Modelos rápidos:</span>
+                    <button type="button" onclick="applyWaPreset('lembrete')" class="text-[11px] text-emerald-400 hover:underline">Lembrete Vencimento</button>
+                    <span class="text-slate-600">&bull;</span>
+                    <button type="button" onclick="applyWaPreset('acessos')" class="text-[11px] text-blue-400 hover:underline">Dados de Acesso</button>
+                    <span class="text-slate-600">&bull;</span>
+                    <button type="button" onclick="applyWaPreset('completo')" class="text-[11px] text-purple-400 hover:underline">Completo</button>
+                </div>
+
+                <!-- Textarea -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Texto do Template</label>
+                    <textarea id="wa-template-input" oninput="updateWaTemplatePreview()" rows="6" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 resize-y" placeholder="Escreva o seu modelo de mensagem..."></textarea>
+                </div>
+
+                <!-- Pré-visualização WhatsApp -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-eye text-emerald-400"></i> Pré-visualização WhatsApp (Simulação):
+                    </label>
+                    <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5 flex justify-start">
+                        <div class="max-w-[95%] bg-[#005c4b] text-white p-3.5 rounded-2xl rounded-tl-sm text-xs sm:text-sm whitespace-pre-wrap shadow leading-relaxed font-sans" id="wa-template-preview"></div>
+                    </div>
+                </div>
+
+                <!-- Rodapé -->
+                <div class="pt-3 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 border-t border-slate-800">
+                    <button type="button" onclick="restoreDefaultWaTemplate()" class="text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-1 py-1">
+                        <i class="fa-solid fa-rotate-left"></i> Restaurar Padrão
+                    </button>
+                    <div class="flex gap-2 justify-end">
+                        <button type="button" onclick="closeWhatsappTemplateModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
+                        <button type="button" onclick="saveWhatsappTemplate()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/20">
+                            <i class="fa-solid fa-check"></i> Guardar Template
+                        </button>
                     </div>
                 </div>
             </div>
@@ -796,7 +881,7 @@
         }
 
         // ==========================================
-        // 4. AUTOCOMPLETE DINÂMICO (SERVIÇOS, BOXES, PREÇOS)
+        // 4. AUTOCOMPLETE DINÂMICO (SERVIÇOS, MARCAS, BOXES, PREÇOS)
         // ==========================================
         function updateFormDatalists() {
             // 1. Serviços
@@ -806,14 +891,21 @@
                 serviceList.innerHTML = uniqueServices.map(s => `<option value="${escapeHTML(s)}">`).join('');
             }
 
-            // 2. Boxes
+            // 2. Marcas de Equipamento
+            const marcaList = document.getElementById('marcas-datalist');
+            if (marcaList) {
+                const uniqueMarcas = [...new Set(clients.map(c => c.marca_equipamento?.trim()).filter(Boolean))].sort();
+                marcaList.innerHTML = uniqueMarcas.map(m => `<option value="${escapeHTML(m)}">`).join('');
+            }
+
+            // 3. Boxes
             const boxList = document.getElementById('boxes-datalist');
             if (boxList) {
                 const uniqueBoxes = [...new Set(clients.map(c => c.box?.trim()).filter(Boolean))].sort();
                 boxList.innerHTML = uniqueBoxes.map(b => `<option value="${escapeHTML(b)}">`).join('');
             }
 
-            // 3. Preços
+            // 4. Preços
             const priceList = document.getElementById('prices-datalist');
             if (priceList) {
                 const uniquePrices = [...new Set(clients.map(c => Number(c.price || 0).toFixed(2)).filter(p => Number(p) > 0))].sort((a,b) => a - b);
@@ -994,6 +1086,7 @@
                 document.getElementById('c-name').value = c.name ?? '';
                 document.getElementById('c-phone').value = c.phone ?? '';
                 document.getElementById('c-service').value = c.service ?? '';
+                document.getElementById('c-marca').value = c.marca_equipamento ?? '';
                 document.getElementById('c-box').value = c.box ?? '';
                 document.getElementById('c-price').value = Number(c.price ?? 0);
                 document.getElementById('c-user').value = c.user ?? '';
@@ -1013,6 +1106,8 @@
                 document.getElementById('modal-title').innerText = 'Novo Cliente de Serviço TV';
                 document.getElementById('client-form').reset();
                 document.getElementById('client-id').value = '';
+                document.getElementById('c-service').value = '';
+                document.getElementById('c-marca').value = '';
                 document.getElementById('c-box').value = '';
                 document.getElementById('c-obs').value = '';
                 document.getElementById('c-date').value = new Date().toISOString().split('T')[0];
@@ -1051,6 +1146,7 @@
                 name: document.getElementById('c-name').value.trim(),
                 phone: document.getElementById('c-phone').value.trim(),
                 service: document.getElementById('c-service').value.trim(),
+                marca_equipamento: document.getElementById('c-marca').value.trim(),
                 box: document.getElementById('c-box').value.trim(),
                 price: parseFloat(document.getElementById('c-price').value) || 0,
                 user: document.getElementById('c-user').value.trim(),
@@ -1523,11 +1619,26 @@
                 if (!line) continue;
                 const cols = parseLine(line);
 
-                if (cols.length >= 11) {
+                if (cols.length >= 12) {
                     parsedClients.push({
                         name: cols[1] || 'Sem Nome',
                         phone: cols[2] || '',
                         service: cols[3] || '',
+                        marca_equipamento: cols[4] || '',
+                        box: cols[5] || '',
+                        user: cols[6] || '',
+                        pass: cols[7] || '',
+                        link: cols[8] || '',
+                        price: parseFloat(String(cols[9]).replace(',', '.')) || 0,
+                        date: cols[10] || new Date().toISOString().split('T')[0],
+                        observacao: cols[11] || ''
+                    });
+                } else if (cols.length >= 11) {
+                    parsedClients.push({
+                        name: cols[1] || 'Sem Nome',
+                        phone: cols[2] || '',
+                        service: cols[3] || '',
+                        marca_equipamento: '',
                         box: cols[4] || '',
                         user: cols[5] || '',
                         pass: cols[6] || '',
@@ -1541,6 +1652,7 @@
                         name: cols[1] || 'Sem Nome',
                         phone: cols[2] || '',
                         service: cols[3] || '',
+                        marca_equipamento: '',
                         box: '',
                         user: cols[4] || '',
                         pass: cols[5] || '',
@@ -1560,7 +1672,7 @@
                 return;
             }
 
-            const headers = ['ID', 'Nome', 'Contacto', 'Servico', 'Box', 'Utilizador', 'Password', 'Link', 'Valor', 'DataVencimento', 'Observacoes'];
+            const headers = ['ID', 'Nome', 'Contacto', 'Servico', 'MarcaEquipamento', 'Box', 'Utilizador', 'Password', 'Link', 'Valor', 'DataVencimento', 'Observacoes'];
             const escapeCSV = (val) => `"${String(val ?? '').replace(/"/g, '""').trim()}"`;
 
             let rows = [headers.join(';')];
@@ -1570,6 +1682,7 @@
                     escapeCSV(c.name),
                     escapeCSV(c.phone),
                     escapeCSV(c.service),
+                    escapeCSV(c.marca_equipamento || ''),
                     escapeCSV(c.box || ''),
                     escapeCSV(c.user),
                     escapeCSV(c.pass),
@@ -1650,14 +1763,197 @@
             return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-circle text-[6px]"></i> Em Atraso</span>`;
         }
 
+        // ==========================================
+        // 11. SISTEMA DE TEMPLATE E ENVIO WHATSAPP
+        // ==========================================
+        const WA_TEMPLATE_STORAGE_KEY = 'gestao_tv_wa_template';
+        const DEFAULT_WA_TEMPLATE = `Olá {nome}!
+Lembrete do seu serviço TV: {servico}{detalhes_equipamento}.
+O valor de {valor}€ tem vencimento a {vencimento}.
+Dados de acesso:
+• Utilizador: {user}
+• Palavra-passe: {pass}
+• Painel: {link}
+Obrigado!`;
+
+        const WA_PRESETS = {
+            lembrete: `Olá {nome}!
+Lembrete do seu serviço TV: {servico}{detalhes_equipamento}.
+O valor de {valor}€ tem vencimento a {vencimento}.
+Por favor confirme o envio do comprovativo assim que efetuar a renovação.
+Obrigado!`,
+
+            acessos: `Olá {nome}!
+Aqui estão os seus dados de acesso ao serviço {servico}:
+• Equipamento: {marca} {box}
+• Utilizador: {user}
+• Palavra-passe: {pass}
+• Painel: {link}
+• Vencimento: {vencimento}
+Bom proveito!`,
+
+            completo: `Olá {nome}!
+Informações da sua conta de TV ({servico}):
+• Equipamento: {marca} {box}
+• Valor: {valor}€
+• Vencimento: {vencimento}
+• Utilizador: {user}
+• Senha: {pass}
+• Painel: {link}
+Obrigado pela preferência!`
+        };
+
+        function getWhatsAppTemplate() {
+            const saved = localStorage.getItem(WA_TEMPLATE_STORAGE_KEY);
+            return (saved && saved.trim()) ? saved : DEFAULT_WA_TEMPLATE;
+        }
+
+        function openWhatsappTemplateModal() {
+            const currentTpl = getWhatsAppTemplate();
+            const input = document.getElementById('wa-template-input');
+            if (input) input.value = currentTpl;
+            updateWaTemplatePreview();
+            const modal = document.getElementById('whatsapp-template-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeWhatsappTemplateModal() {
+            const modal = document.getElementById('whatsapp-template-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function insertWaTag(tag) {
+            const input = document.getElementById('wa-template-input');
+            if (!input) return;
+            const start = input.selectionStart || 0;
+            const end = input.selectionEnd || 0;
+            const text = input.value;
+            input.value = text.substring(0, start) + tag + text.substring(end);
+            input.focus();
+            input.selectionStart = input.selectionEnd = start + tag.length;
+            updateWaTemplatePreview();
+        }
+
+        function applyWaPreset(presetKey) {
+            if (WA_PRESETS[presetKey]) {
+                const input = document.getElementById('wa-template-input');
+                if (input) {
+                    input.value = WA_PRESETS[presetKey];
+                    updateWaTemplatePreview();
+                }
+            }
+        }
+
+        function restoreDefaultWaTemplate() {
+            const input = document.getElementById('wa-template-input');
+            if (input) {
+                input.value = DEFAULT_WA_TEMPLATE;
+                updateWaTemplatePreview();
+            }
+        }
+
+        function saveWhatsappTemplate() {
+            const input = document.getElementById('wa-template-input');
+            if (!input) return;
+            const val = input.value.trim();
+            if (!val) {
+                alert('O template não pode ficar vazio.');
+                return;
+            }
+            localStorage.setItem(WA_TEMPLATE_STORAGE_KEY, val);
+            closeWhatsappTemplateModal();
+            alert('Template de WhatsApp guardado com sucesso!');
+        }
+
+        function updateWaTemplatePreview() {
+            const input = document.getElementById('wa-template-input');
+            const preview = document.getElementById('wa-template-preview');
+            if (!input || !preview) return;
+
+            const sampleClient = {
+                name: 'João Silva',
+                service: 'IPTV Premium',
+                marca_equipamento: 'Xiaomi',
+                box: 'Mi Box S 4K',
+                price: 15.00,
+                date: '2026-11-25',
+                user: 'cliente_joao',
+                pass: 'tv123456',
+                link: 'http://meupainel.tv:8080',
+                observacao: 'Cliente VIP'
+            };
+
+            let sampleMsg = input.value || '';
+            const formattedDate = '25/11/2026';
+            const eqParts = [sampleClient.marca_equipamento, sampleClient.box].filter(Boolean);
+            const eqStr = eqParts.length > 0 ? ` (${eqParts.join(' ')})` : '';
+
+            const replaceToken = (text, token, val) => {
+                const reg = new RegExp(`\\{\\{?${token}\\}?\\}`, 'gi');
+                return text.replace(reg, val);
+            };
+
+            sampleMsg = replaceToken(sampleMsg, 'detalhes_equipamento', eqStr);
+            sampleMsg = replaceToken(sampleMsg, 'nome', sampleClient.name);
+            sampleMsg = replaceToken(sampleMsg, 'servico', sampleClient.service);
+            sampleMsg = replaceToken(sampleMsg, 'marca', sampleClient.marca_equipamento);
+            sampleMsg = replaceToken(sampleMsg, 'box', sampleClient.box);
+            sampleMsg = replaceToken(sampleMsg, 'valor', Number(sampleClient.price).toFixed(2));
+            sampleMsg = replaceToken(sampleMsg, 'vencimento', formattedDate);
+            sampleMsg = replaceToken(sampleMsg, 'user', sampleClient.user);
+            sampleMsg = replaceToken(sampleMsg, 'pass', sampleClient.pass);
+            sampleMsg = replaceToken(sampleMsg, 'link', sampleClient.link);
+            sampleMsg = replaceToken(sampleMsg, 'obs', sampleClient.observacao);
+
+            sampleMsg = sampleMsg.replace(/\(\s*\)/g, '').replace(/  +/g, ' ');
+            preview.textContent = sampleMsg;
+        }
+
+        function buildWhatsAppMessage(c) {
+            const template = getWhatsAppTemplate();
+            const formattedDate = c.date ? c.date.split('-').reverse().join('/') : '-';
+            const eqParts = [c.marca_equipamento, c.box].filter(Boolean);
+            const eqStr = eqParts.length > 0 ? ` (${eqParts.join(' ')})` : '';
+
+            const replaceToken = (text, token, val) => {
+                const reg = new RegExp(`\\{\\{?${token}\\}?\\}`, 'gi');
+                return text.replace(reg, val);
+            };
+
+            let msg = template;
+            msg = replaceToken(msg, 'detalhes_equipamento', eqStr);
+            msg = replaceToken(msg, 'nome', c.name || '');
+            msg = replaceToken(msg, 'servico', c.service || '');
+            msg = replaceToken(msg, 'marca', c.marca_equipamento || '');
+            msg = replaceToken(msg, 'box', c.box || '');
+            msg = replaceToken(msg, 'valor', Number(c.price || 0).toFixed(2));
+            msg = replaceToken(msg, 'vencimento', formattedDate);
+            msg = replaceToken(msg, 'user', c.user || '-');
+            msg = replaceToken(msg, 'pass', c.pass || '-');
+            msg = replaceToken(msg, 'link', c.link || '-');
+            msg = replaceToken(msg, 'obs', c.observacao || '');
+
+            msg = msg.replace(/\(\s*\)/g, '').replace(/  +/g, ' ');
+            return msg.trim();
+        }
+
         function sendWhatsApp(id) {
             const c = clients.find(x => String(x.id) === String(id));
             if (!c || !c.phone) {
                 alert('Este cliente não tem número de telefone registado.');
                 return;
             }
-            const cleanPhone = String(c.phone).replace(/\D/g, '');
-            const msg = `Olá ${c.name}, lembrete do seu serviço de TV (${c.service}${c.box ? ' - ' + c.box : ''}). O valor de ${Number(c.price || 0).toFixed(2)}€ tem vencimento a ${c.date}. Utilizador: ${c.user || '-'}. Obrigado!`;
+            let cleanPhone = String(c.phone).replace(/\D/g, '');
+            if (cleanPhone.length === 9 && (cleanPhone.startsWith('9') || cleanPhone.startsWith('2'))) {
+                cleanPhone = '351' + cleanPhone;
+            }
+            const msg = buildWhatsAppMessage(c);
             window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
@@ -1690,7 +1986,7 @@
                 else if (st === 'warning') warningCount++;
                 else overdueCount++;
 
-                const haystack = [c.name, c.phone, c.service, c.box, c.user, c.link, c.observacao]
+                const haystack = [c.name, c.phone, c.service, c.marca_equipamento, c.box, c.user, c.link, c.observacao]
                     .map(v => String(v ?? '').toLowerCase())
                     .join(' ');
 
@@ -1741,7 +2037,10 @@
                     </td>
                     <td class="p-4">
                         <div class="text-slate-200 font-medium">${escapeHTML(c.service)}</div>
-                        ${c.box ? `<div class="text-xs text-purple-400 font-medium flex items-center gap-1 mt-0.5"><i class="fa-solid fa-box text-[10px]"></i> ${escapeHTML(c.box)}</div>` : ''}
+                        <div class="flex flex-wrap items-center gap-1 mt-1">
+                            ${c.marca_equipamento ? `<span class="inline-flex items-center gap-1 text-[11px] font-medium bg-sky-950/60 text-sky-400 border border-sky-800/60 px-1.5 py-0.5 rounded"><i class="fa-solid fa-tag text-[9px]"></i> ${escapeHTML(c.marca_equipamento)}</span>` : ''}
+                            ${c.box ? `<span class="inline-flex items-center gap-1 text-[11px] font-medium bg-purple-950/60 text-purple-400 border border-purple-800/60 px-1.5 py-0.5 rounded"><i class="fa-solid fa-box text-[9px]"></i> ${escapeHTML(c.box)}</span>` : ''}
+                        </div>
                     </td>
                     <td class="p-4">
                         <div class="text-xs text-slate-300 flex items-center gap-1.5">
@@ -1804,7 +2103,10 @@
                         <div>
                             <span class="text-slate-400 block">Serviço:</span>
                             <span class="text-white font-medium">${escapeHTML(c.service)}</span>
-                            ${c.box ? `<span class="text-purple-400 block text-[11px] mt-0.5"><i class="fa-solid fa-box text-[9px] mr-1"></i>${escapeHTML(c.box)}</span>` : ''}
+                            <div class="flex flex-wrap items-center gap-1 mt-1">
+                                ${c.marca_equipamento ? `<span class="inline-flex items-center gap-1 text-[11px] font-medium text-sky-400"><i class="fa-solid fa-tag text-[9px]"></i> ${escapeHTML(c.marca_equipamento)}</span>` : ''}
+                                ${c.box ? `<span class="inline-flex items-center gap-1 text-[11px] font-medium text-purple-400"><i class="fa-solid fa-box text-[9px]"></i> ${escapeHTML(c.box)}</span>` : ''}
+                            </div>
                         </div>
                         <div>
                             <span class="text-slate-400 block">Valor / Vencimento:</span>
@@ -1888,7 +2190,7 @@
                 c.name || '-',
                 c.phone || '-',
                 c.service || '-',
-                c.box || '-',
+                [c.marca_equipamento, c.box].filter(Boolean).join(' - ') || '-',
                 c.user || '-',
                 `${Number(c.price || 0).toFixed(2)} €`,
                 c.date || '-',
@@ -1898,7 +2200,7 @@
 
             doc.autoTable({
                 startY: 30,
-                head: [['Cliente', 'Contacto', 'Serviço TV', 'Box / Dispositivo', 'Utilizador', 'Valor', 'Vencimento', 'Estado', 'Notas']],
+                head: [['Cliente', 'Contacto', 'Serviço TV', 'Marca / Box', 'Utilizador', 'Valor', 'Vencimento', 'Estado', 'Notas']],
                 body: body,
                 theme: 'striped',
                 styles: { fontSize: 8, cellPadding: 3 },

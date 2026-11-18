@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS public.clientes (
     name TEXT NOT NULL,
     phone TEXT,
     service TEXT NOT NULL,
+    marca_equipamento TEXT,
     box TEXT,
     price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
     "user" TEXT,
