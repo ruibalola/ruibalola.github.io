@@ -55,10 +55,13 @@ CREATE TABLE IF NOT EXISTS public.clientes (
     name TEXT NOT NULL,
     phone TEXT,
     service TEXT NOT NULL,
+    box TEXT,
     price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
     "user" TEXT,
     pass TEXT,
     link TEXT,
+    observacao TEXT,
+    ficheiros JSONB DEFAULT '[]'::jsonb,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())

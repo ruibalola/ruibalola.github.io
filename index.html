@@ -18,6 +18,11 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col antialiased">
 
+    <!-- DATALISTS PARA AUTOCOMPLETE COM VALORES EXISTENTES -->
+    <datalist id="services-datalist"></datalist>
+    <datalist id="boxes-datalist"></datalist>
+    <datalist id="prices-datalist"></datalist>
+
     <!-- ============================================================================== -->
     <!-- 1. ECRÃ DE LOGIN (ACESSO RESTRITO - SEM CRIAÇÃO PÚBLICA) -->
     <!-- ============================================================================== -->
@@ -109,7 +114,7 @@
                         <i class="fa-solid fa-plus"></i> <span>Novo Cliente</span>
                     </button>
 
-                    <!-- Gestão de Utilizadores (Apenas Root / Admin) -->
+                    <!-- Gestão de Utilizadores (Apenas Root) -->
                     <button id="btn-user-mgmt" onclick="openUserMgmtModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 shadow-lg shadow-purple-600/20" title="Gerir Utilizadores do Sistema (Root)">
                         <i class="fa-solid fa-users-gear"></i> <span>Utilizadores</span>
                     </button>
@@ -188,12 +193,24 @@
                 </div>
             </div>
 
-            <!-- Pesquisa e Filtros (Isolados em form de pesquisa próprio para impedir autopreenchimento de credenciais) -->
+            <!-- Pesquisa e Filtros (Blindado contra Autopreenchimento de Login) -->
             <form role="search" onsubmit="event.preventDefault();" autocomplete="off" class="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between shadow-lg">
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
                     <div class="relative flex-1">
                         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 pointer-events-none"><i class="fa-solid fa-search"></i></span>
-                        <input type="search" id="search-input" name="search_clients_query" value="" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="handleSearchInput()" placeholder="Pesquisar cliente, contacto, user, serviço ou link..." class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-10 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <input type="search" 
+                               id="search-input" 
+                               name="search_query_clients_no_autofill" 
+                               value="" 
+                               autocomplete="off" 
+                               autocorrect="off" 
+                               autocapitalize="off" 
+                               spellcheck="false" 
+                               readonly 
+                               onfocus="this.removeAttribute('readonly');" 
+                               oninput="handleSearchInput(event)" 
+                               placeholder="Pesquisar cliente, contacto, box, user, serviço ou link..." 
+                               class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-10 text-sm text-white focus:outline-none focus:border-blue-500">
                         <button type="button" id="btn-clear-search" onclick="clearSearchInput()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white" title="Limpar pesquisa">
                             <i class="fa-solid fa-circle-xmark text-sm"></i>
                         </button>
@@ -214,7 +231,7 @@
                         <thead>
                             <tr class="bg-slate-950/80 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                                 <th class="p-4">Cliente / Contacto</th>
-                                <th class="p-4">Serviço TV</th>
+                                <th class="p-4">Serviço / Box</th>
                                 <th class="p-4">Acessos (User / Senha)</th>
                                 <th class="p-4">Link / Painel</th>
                                 <th class="p-4">Valor</th>
@@ -249,7 +266,6 @@
                 <button onclick="closeUserMgmtModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-5 sm:p-6 space-y-4">
-                
                 <div class="flex justify-between items-center">
                     <p class="text-xs text-slate-400">Apenas o administrador <b class="text-white">root</b> pode criar e gerir utilizadores com acesso ao painel.</p>
                     <button onclick="openNewUserModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow">
@@ -257,7 +273,6 @@
                     </button>
                 </div>
 
-                <!-- Tabela de Utilizadores -->
                 <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
                     <table class="w-full text-left border-collapse text-xs">
                         <thead>
@@ -286,7 +301,7 @@
                 <h3 id="new-user-modal-title" class="font-bold text-base text-white">Criar Novo Utilizador</h3>
                 <button onclick="closeNewUserModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form onsubmit="handleSaveSystemUser(event)" class="p-5 sm:p-6 space-y-4">
+            <form onsubmit="handleSaveSystemUser(event)" autocomplete="off" class="p-5 sm:p-6 space-y-4">
                 <input type="hidden" id="edit-user-id">
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nome Completo *</label>
@@ -330,7 +345,6 @@
                 <button onclick="closeChangeMyPasswordModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="handleSaveMyPassword(event)" autocomplete="off" class="p-5 sm:p-6 space-y-4">
-                <!-- Campo oculto para evitar que o gestor de senhas do navegador associe ao search-input -->
                 <input type="text" name="username" autocomplete="username" class="hidden" style="display:none;" aria-hidden="true" tabindex="-1">
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Palavra-passe Atual *</label>
@@ -352,15 +366,17 @@
         </div>
     </div>
 
-    <!-- MODAL 4: CRIAR / EDITAR CLIENTE DE TV -->
+    <!-- MODAL 4: CRIAR / EDITAR CLIENTE DE TV (COM BOX, OBS, DATA ATUALIZAÇÃO E FICHEIROS) -->
     <div id="client-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-8">
             <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
                 <h3 id="modal-title" class="font-bold text-base sm:text-lg text-white">Novo Cliente de Serviço TV</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="client-form" onsubmit="saveClient(event)" class="p-5 sm:p-6 space-y-4">
+            <form id="client-form" onsubmit="saveClient(event)" autocomplete="off" class="p-5 sm:p-6 space-y-4">
                 <input type="hidden" id="client-id">
+                
+                <!-- Nome & Contacto -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nome do Cliente *</label>
@@ -371,42 +387,85 @@
                         <input type="text" id="c-phone" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: +351 912345678">
                     </div>
                 </div>
+
+                <!-- Serviço & Box (Ambos com Autocomplete) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Tipo de Serviço TV *</label>
-                        <input type="text" id="c-service" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: IPTV Premium">
+                        <input type="text" id="c-service" list="services-datalist" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: IPTV Premium (sugestões)">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Valor (€) *</label>
-                        <input type="number" step="0.01" min="0" id="c-price" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: 10.00">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Dispositivo / Box TV</label>
+                        <input type="text" id="c-box" list="boxes-datalist" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: Formuler, FireStick, Mag...">
                     </div>
                 </div>
+
+                <!-- Valor (€) com Autocomplete & Data de Vencimento -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Valor (€) *</label>
+                        <input type="number" step="0.01" min="0" id="c-price" list="prices-datalist" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: 10.00">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Data Próximo Pagamento *</label>
+                        <input type="date" id="c-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <!-- Acessos: Utilizador e Senha -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Utilizador (User)</label>
-                        <input type="text" id="c-user" autocomplete="off" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: cliente123">
+                        <input type="text" id="c-user" autocomplete="off" name="client_user_entry" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-mono" placeholder="Ex: cliente123">
                     </div>
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label class="text-xs font-semibold text-slate-400 uppercase">Palavra-passe (Pass)</label>
-                            <button type="button" onclick="generatePasswordForForm()" class="text-[10px] text-blue-400 hover:underline">Gerar</button>
+                            <button type="button" onclick="generatePasswordForForm()" class="text-[10px] text-blue-400 hover:underline">Gerar Segura</button>
                         </div>
                         <div class="relative">
-                            <input type="password" id="c-pass" autocomplete="new-password" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 pr-10 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: senha123">
+                            <input type="password" id="c-pass" autocomplete="new-password" name="client_pwd_entry" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 pr-10 text-sm font-mono text-white focus:outline-none focus:border-blue-500" placeholder="Ex: senha123">
                             <button type="button" onclick="toggleFormPassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white">
                                 <i id="eye-modal-pass" class="fa-solid fa-eye"></i>
                             </button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Link / Painel / M3U -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Link (URL / Painel / M3U)</label>
                     <input type="text" id="c-link" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: http://servidor.com/get.php?...">
                 </div>
+
+                <!-- Observações / Notas -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Data Próximo Pagamento *</label>
-                    <input type="date" id="c-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Observações / Notas</label>
+                    <textarea id="c-obs" rows="2" placeholder="Notas sobre o cliente, MAC address, contacto alternativo, etc." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"></textarea>
                 </div>
+
+                <!-- Data de Atualização (Histórico) -->
+                <div class="text-xs text-slate-400 bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Última Atualização:</span>
+                    <span id="c-updated-display" class="font-mono text-slate-300">Hoje</span>
+                </div>
+
+                <!-- Anexar Ficheiros / Histórico de Comprovativos -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-semibold text-slate-400 uppercase">Ficheiros / Comprovativos (Histórico)</label>
+                        <span class="text-[10px] text-slate-500">Fotos, Comprovativos, PDFs</span>
+                    </div>
+
+                    <label class="cursor-pointer border border-dashed border-slate-700 hover:border-blue-500 bg-slate-950/70 hover:bg-slate-900 rounded-xl p-3 flex items-center justify-center gap-2 text-xs text-slate-300 transition">
+                        <i class="fa-solid fa-paperclip text-blue-400"></i> <span>Clique para adicionar ficheiro / comprovativo</span>
+                        <input type="file" id="c-files-input" multiple onchange="handleModalFileUpload(event)" class="hidden">
+                    </label>
+
+                    <div id="c-files-container" class="space-y-1.5 max-h-32 overflow-y-auto"></div>
+                </div>
+
+                <!-- Botões de Ação -->
                 <div class="pt-3 flex justify-end gap-3 border-t border-slate-800">
                     <button type="button" onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl text-sm transition">Cancelar</button>
                     <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-lg shadow-blue-500/20">Guardar no Supabase</button>
@@ -425,7 +484,7 @@
                 </div>
                 <button onclick="closeClientPasswordModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form onsubmit="saveClientPassword(event)" class="p-5 sm:p-6 space-y-4">
+            <form onsubmit="saveClientPassword(event)" autocomplete="off" class="p-5 sm:p-6 space-y-4">
                 <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs space-y-1">
                     <p class="text-slate-400">Cliente: <b id="pwd-modal-client-name" class="text-white text-sm"></b></p>
                     <p class="text-slate-400">Utilizador: <span id="pwd-modal-client-user" class="font-mono text-blue-400"></span></p>
@@ -454,7 +513,26 @@
         </div>
     </div>
 
-    <!-- MODAL 6: CONFIGURAÇÃO SUPABASE -->
+    <!-- MODAL 6: VISUALIZAR FICHEIROS / HISTÓRICO DO CLIENTE -->
+    <div id="view-files-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-folder-open text-blue-400"></i>
+                    <h3 class="font-bold text-base text-white">Ficheiros / Comprovativos: <span id="view-files-client-name" class="text-blue-400"></span></h3>
+                </div>
+                <button onclick="closeViewFilesModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-5 sm:p-6 space-y-3">
+                <div id="view-files-list" class="space-y-2 max-h-72 overflow-y-auto"></div>
+                <div class="pt-3 flex justify-end border-t border-slate-800">
+                    <button type="button" onclick="closeViewFilesModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 7: CONFIGURAÇÃO SUPABASE -->
     <div id="config-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
             <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
@@ -506,6 +584,8 @@
         let currentUser = null;
         let currentEditingClientId = null;
         let visiblePasswords = {};
+        let modalAttachedFiles = [];
+        let userHasTypedInSearch = false; // Flag para neutralizar preenchimento fantasma do navegador
 
         // ==========================================
         // 1. INICIALIZAÇÃO & VERIFICAÇÃO DE SESSÃO
@@ -525,7 +605,6 @@
             try {
                 supabaseClient = window.supabase.createClient(config.url, config.key);
                 
-                // Verifica se já existia uma sessão guardada no navegador
                 const savedSession = sessionStorage.getItem(SESSION_USER_KEY) || localStorage.getItem(SESSION_USER_KEY);
                 if (savedSession) {
                     try {
@@ -548,7 +627,6 @@
         }
 
         async function resolveSupabaseConfig() {
-            // 1. Prioridade: config.js (window.ENV)
             let url = (typeof window.ENV !== 'undefined' && window.ENV.SUPABASE_URL && !window.ENV.SUPABASE_URL.includes('SEU-PROJETO'))
                 ? window.ENV.SUPABASE_URL.trim()
                 : '';
@@ -556,7 +634,6 @@
                 ? window.ENV.SUPABASE_ANON_KEY.trim()
                 : '';
 
-            // 2. localStorage
             if (!url) url = (localStorage.getItem(SUPABASE_STORAGE_URL) || '').trim();
             if (!key) key = (localStorage.getItem(SUPABASE_STORAGE_KEY) || '').trim();
 
@@ -579,20 +656,15 @@
             document.getElementById('app-view').classList.remove('hidden');
             document.getElementById('app-view').classList.add('flex');
 
-            // Limpa explicitamente a pesquisa para mostrar todos os clientes sem filtros
             clearSearchInput(false);
-
-            // Proteção contra autopreenchimento assíncrono de passwords do navegador
             setTimeout(sanitizeSearchInput, 50);
             setTimeout(sanitizeSearchInput, 200);
             setTimeout(sanitizeSearchInput, 500);
-            setTimeout(sanitizeSearchInput, 1000);
 
             document.getElementById('logged-user-display').innerText = user.username || user.nome;
             const badge = document.getElementById('logged-user-role-badge');
             badge.innerText = (user.role || 'ADMIN').toUpperCase();
 
-            // Mostra botão de gestão de utilizadores apenas para root
             const btnMgmt = document.getElementById('btn-user-mgmt');
             if (btnMgmt) {
                 if (user.role === 'root') btnMgmt.classList.remove('hidden');
@@ -600,33 +672,43 @@
             }
         }
 
+        // ==========================================
+        // 3. BLINDAGEM DO CAMPO DE PESQUISA (SEM AUTOFILL)
+        // ==========================================
         function sanitizeSearchInput() {
             const input = document.getElementById('search-input');
             if (!input) return;
-            const val = input.value.trim().toLowerCase();
-            // Se o navegador inseriu automaticamente o utilizador de login no campo de pesquisa
-            if (val === 'admin' || (currentUser && val === (currentUser.username || '').toLowerCase())) {
+            if (!userHasTypedInSearch && input.value) {
                 input.value = '';
+                input.setAttribute('readonly', 'readonly');
                 const btn = document.getElementById('btn-clear-search');
                 if (btn) btn.classList.add('hidden');
                 renderUI();
             }
         }
 
-        function handleSearchInput() {
+        function handleSearchInput(e) {
+            userHasTypedInSearch = true;
             const input = document.getElementById('search-input');
             const btn = document.getElementById('btn-clear-search');
             if (input && btn) {
                 if (input.value.trim().length > 0) btn.classList.remove('hidden');
-                else btn.classList.add('hidden');
+                else {
+                    btn.classList.add('hidden');
+                    userHasTypedInSearch = false;
+                }
             }
             renderUI();
         }
 
         function clearSearchInput(shouldRender = true) {
+            userHasTypedInSearch = false;
             const input = document.getElementById('search-input');
             const btn = document.getElementById('btn-clear-search');
-            if (input) input.value = '';
+            if (input) {
+                input.value = '';
+                input.setAttribute('readonly', 'readonly');
+            }
             if (btn) btn.classList.add('hidden');
             const filterStatus = document.getElementById('filter-status');
             if (filterStatus) filterStatus.value = 'all';
@@ -653,14 +735,12 @@
             btn.classList.add('opacity-70');
 
             try {
-                // Chama a função PostgreSQL autenticar_usuario com verificação bcrypt
                 const { data, error } = await supabaseClient.rpc('autenticar_usuario', {
                     p_username: username,
                     p_password: password
                 });
 
                 if (error) throw error;
-
                 if (!data || data.length === 0) {
                     showLoginAlert('Utilizador ou palavra-passe incorretos.');
                     return;
@@ -716,7 +796,420 @@
         }
 
         // ==========================================
-        // 3. GESTÃO DE UTILIZADORES DO SISTEMA (ROOT)
+        // 4. AUTOCOMPLETE DINÂMICO (SERVIÇOS, BOXES, PREÇOS)
+        // ==========================================
+        function updateFormDatalists() {
+            // 1. Serviços
+            const serviceList = document.getElementById('services-datalist');
+            if (serviceList) {
+                const uniqueServices = [...new Set(clients.map(c => c.service?.trim()).filter(Boolean))].sort();
+                serviceList.innerHTML = uniqueServices.map(s => `<option value="${escapeHTML(s)}">`).join('');
+            }
+
+            // 2. Boxes
+            const boxList = document.getElementById('boxes-datalist');
+            if (boxList) {
+                const uniqueBoxes = [...new Set(clients.map(c => c.box?.trim()).filter(Boolean))].sort();
+                boxList.innerHTML = uniqueBoxes.map(b => `<option value="${escapeHTML(b)}">`).join('');
+            }
+
+            // 3. Preços
+            const priceList = document.getElementById('prices-datalist');
+            if (priceList) {
+                const uniquePrices = [...new Set(clients.map(c => Number(c.price || 0).toFixed(2)).filter(p => Number(p) > 0))].sort((a,b) => a - b);
+                priceList.innerHTML = uniquePrices.map(p => `<option value="${escapeHTML(p)}">`).join('');
+            }
+        }
+
+        // ==========================================
+        // 5. GESTÃO DE FICHEIROS ANEXADOS (NO MODAL)
+        // ==========================================
+        function handleModalFileUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            Array.from(files).forEach(file => {
+                if (file.size > 2.5 * 1024 * 1024) {
+                    alert(`O ficheiro "${file.name}" ultrapassa o limite de 2.5MB.`);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const fileObj = {
+                        id: 'f_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        date: new Date().toLocaleDateString('pt-PT'),
+                        data: e.target.result
+                    };
+                    modalAttachedFiles.push(fileObj);
+                    renderModalFilesList();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            event.target.value = '';
+        }
+
+        function removeModalFile(fileId) {
+            modalAttachedFiles = modalAttachedFiles.filter(f => f.id !== fileId);
+            renderModalFilesList();
+        }
+
+        function renderModalFilesList() {
+            const container = document.getElementById('c-files-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (modalAttachedFiles.length === 0) {
+                container.innerHTML = '<p class="text-[11px] text-slate-500 italic">Nenhum comprovativo ou ficheiro anexado.</p>';
+                return;
+            }
+
+            modalAttachedFiles.forEach(f => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2 bg-slate-950 rounded-xl border border-slate-800 text-xs';
+                const sizeFormatted = (f.size < 1024 * 1024) 
+                    ? `${(f.size / 1024).toFixed(1)} KB` 
+                    : `${(f.size / (1024 * 1024)).toFixed(1)} MB`;
+
+                const isImg = f.type?.startsWith('image/');
+                const iconClass = isImg ? 'fa-solid fa-file-image text-emerald-400' : 'fa-solid fa-file-pdf text-red-400';
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-2 truncate mr-2 flex-1">
+                        <i class="${iconClass}"></i>
+                        <div class="truncate">
+                            <p class="font-medium text-white truncate text-[11px]">${escapeHTML(f.name)}</p>
+                            <p class="text-[10px] text-slate-400">${sizeFormatted} &bull; ${escapeHTML(f.date || '')}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <a href="${f.data}" download="${escapeHTML(f.name)}" class="p-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white rounded-lg transition" title="Descarregar ficheiro">
+                            <i class="fa-solid fa-download text-[11px]"></i>
+                        </a>
+                        <button type="button" onclick="removeModalFile('${f.id}')" class="p-1.5 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded-lg transition" title="Remover">
+                            <i class="fa-solid fa-trash text-[11px]"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function openViewFilesModal(id) {
+            const c = clients.find(x => String(x.id) === String(id));
+            if (!c || !c.ficheiros || c.ficheiros.length === 0) return;
+
+            document.getElementById('view-files-client-name').innerText = c.name;
+            const container = document.getElementById('view-files-list');
+            container.innerHTML = '';
+
+            c.ficheiros.forEach(f => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs';
+                const isImg = f.type?.startsWith('image/');
+                const iconClass = isImg ? 'fa-solid fa-file-image text-emerald-400 text-lg' : 'fa-solid fa-file-pdf text-red-400 text-lg';
+                const sizeFormatted = (f.size < 1024 * 1024) 
+                    ? `${(f.size / 1024).toFixed(1)} KB` 
+                    : `${(f.size / (1024 * 1024)).toFixed(1)} MB`;
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-2.5 truncate mr-2">
+                        <i class="${iconClass}"></i>
+                        <div class="truncate">
+                            <p class="font-medium text-white truncate text-xs">${escapeHTML(f.name)}</p>
+                            <p class="text-[11px] text-slate-400">${sizeFormatted} &bull; ${escapeHTML(f.date || '')}</p>
+                        </div>
+                    </div>
+                    <a href="${f.data}" download="${escapeHTML(f.name)}" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-download"></i> Baixar
+                    </a>
+                `;
+                container.appendChild(item);
+            });
+
+            const modal = document.getElementById('view-files-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeViewFilesModal() {
+            const modal = document.getElementById('view-files-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // ==========================================
+        // 6. GESTÃO DE CLIENTES TV NO SUPABASE (CRUD)
+        // ==========================================
+        async function fetchClientsFromSupabase() {
+            if (!supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('clientes')
+                    .select('*')
+                    .order('date', { ascending: true });
+
+                if (error) throw error;
+                clients = data || [];
+                updateFormDatalists();
+                renderUI();
+            } catch (err) {
+                console.error('Erro ao ler clientes do Supabase:', err);
+            }
+        }
+
+        function setupRealtime() {
+            if (!supabaseClient) return;
+            try {
+                if (realtimeSubscription) {
+                    supabaseClient.removeChannel(realtimeSubscription);
+                }
+                realtimeSubscription = supabaseClient
+                    .channel('clientes_realtime_sync')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'clientes' }, () => {
+                        fetchClientsFromSupabase();
+                    })
+                    .subscribe();
+            } catch (e) {
+                console.warn('Realtime subscription error:', e);
+            }
+        }
+
+        function openModal(id = null) {
+            const modal = document.getElementById('client-modal');
+            const passInput = document.getElementById('c-pass');
+            const eyeIcon = document.getElementById('eye-modal-pass');
+            passInput.type = 'password';
+            eyeIcon.className = 'fa-solid fa-eye';
+
+            if (id !== null && id !== undefined) {
+                const c = clients.find(x => String(x.id) === String(id));
+                if (!c) return;
+                document.getElementById('modal-title').innerText = 'Editar Cliente';
+                document.getElementById('client-id').value = String(c.id);
+                document.getElementById('c-name').value = c.name ?? '';
+                document.getElementById('c-phone').value = c.phone ?? '';
+                document.getElementById('c-service').value = c.service ?? '';
+                document.getElementById('c-box').value = c.box ?? '';
+                document.getElementById('c-price').value = Number(c.price ?? 0);
+                document.getElementById('c-user').value = c.user ?? '';
+                document.getElementById('c-pass').value = c.pass ?? '';
+                document.getElementById('c-link').value = c.link ?? '';
+                document.getElementById('c-obs').value = c.observacao ?? '';
+                document.getElementById('c-date').value = c.date ?? '';
+
+                const updatedFormatted = c.updated_at 
+                    ? new Date(c.updated_at).toLocaleString('pt-PT') 
+                    : 'Desconhecida';
+                document.getElementById('c-updated-display').innerText = updatedFormatted;
+
+                modalAttachedFiles = Array.isArray(c.ficheiros) ? JSON.parse(JSON.stringify(c.ficheiros)) : [];
+                renderModalFilesList();
+            } else {
+                document.getElementById('modal-title').innerText = 'Novo Cliente de Serviço TV';
+                document.getElementById('client-form').reset();
+                document.getElementById('client-id').value = '';
+                document.getElementById('c-box').value = '';
+                document.getElementById('c-obs').value = '';
+                document.getElementById('c-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('c-updated-display').innerText = 'Agora (Novo Registo)';
+                modalAttachedFiles = [];
+                renderModalFilesList();
+            }
+
+            updateFormDatalists();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('client-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function saveClient(e) {
+            e.preventDefault();
+            if (!supabaseClient) {
+                alert('Supabase não conectado.');
+                return;
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Guardar no Supabase';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> A guardar...';
+            }
+
+            const existingId = document.getElementById('client-id').value.trim();
+            const clientData = {
+                name: document.getElementById('c-name').value.trim(),
+                phone: document.getElementById('c-phone').value.trim(),
+                service: document.getElementById('c-service').value.trim(),
+                box: document.getElementById('c-box').value.trim(),
+                price: parseFloat(document.getElementById('c-price').value) || 0,
+                user: document.getElementById('c-user').value.trim(),
+                pass: document.getElementById('c-pass').value.trim(),
+                link: document.getElementById('c-link').value.trim(),
+                observacao: document.getElementById('c-obs').value.trim(),
+                ficheiros: modalAttachedFiles,
+                date: document.getElementById('c-date').value
+            };
+
+            try {
+                let savedClient = null;
+
+                if (existingId) {
+                    const { data, error } = await supabaseClient
+                        .from('clientes')
+                        .update(clientData)
+                        .eq('id', existingId)
+                        .select();
+                    if (error) throw error;
+                    if (data && data.length > 0) savedClient = data[0];
+                } else {
+                    const { data, error } = await supabaseClient
+                        .from('clientes')
+                        .insert([clientData])
+                        .select();
+                    if (error) throw error;
+                    if (data && data.length > 0) savedClient = data[0];
+                }
+
+                closeModal();
+                clearSearchInput(false);
+
+                // Atualização instantânea em memória (0ms de atraso)
+                if (savedClient) {
+                    if (existingId) {
+                        const idx = clients.findIndex(x => String(x.id) === String(existingId));
+                        if (idx !== -1) clients[idx] = savedClient;
+                        else clients.unshift(savedClient);
+                    } else {
+                        clients.unshift(savedClient);
+                    }
+                    updateFormDatalists();
+                    renderUI();
+                }
+
+                await fetchClientsFromSupabase();
+            } catch (err) {
+                console.error('Erro ao guardar cliente:', err);
+                alert('Erro ao guardar no Supabase: ' + (err.message || err));
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            }
+        }
+
+        async function deleteClient(id) {
+            const target = clients.find(x => String(x.id) === String(id));
+            if (!target) return;
+            if (!confirm(`Tem a certeza de que deseja apagar definitivamente o cliente "${target.name}" da base de dados Supabase?`)) {
+                return;
+            }
+
+            try {
+                clients = clients.filter(x => String(x.id) !== String(id));
+                renderUI();
+
+                const { error } = await supabaseClient
+                    .from('clientes')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    await fetchClientsFromSupabase();
+                    throw error;
+                }
+            } catch (err) {
+                console.error('Erro ao eliminar cliente:', err);
+                alert('Erro ao eliminar no Supabase: ' + (err.message || err));
+                await fetchClientsFromSupabase();
+            }
+        }
+
+        // ==========================================
+        // 7. GESTÃO DE SENHA DO CLIENTE (RÁPIDO)
+        // ==========================================
+        function generatePasswordForForm() {
+            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
+            let res = '';
+            for (let i = 0; i < 9; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            const input = document.getElementById('c-pass');
+            input.value = res;
+            input.type = 'text';
+            document.getElementById('eye-modal-pass').className = 'fa-solid fa-eye-slash';
+        }
+
+        function openClientPasswordModal(id) {
+            const c = clients.find(x => String(x.id) === String(id));
+            if (!c) return;
+            currentEditingClientId = String(id);
+            document.getElementById('pwd-modal-client-name').innerText = c.name;
+            document.getElementById('pwd-modal-client-user').innerText = c.user || 'Sem utilizador';
+            document.getElementById('pwd-modal-input').value = c.pass || '';
+
+            const modal = document.getElementById('client-password-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeClientPasswordModal() {
+            currentEditingClientId = null;
+            const modal = document.getElementById('client-password-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function generatePasswordForQuickModal() {
+            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
+            let res = '';
+            for (let i = 0; i < 9; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            document.getElementById('pwd-modal-input').value = res;
+        }
+
+        function copyModalPassword() {
+            const val = document.getElementById('pwd-modal-input').value;
+            if (!val) return;
+            navigator.clipboard.writeText(val);
+            alert('Palavra-passe copiada!');
+        }
+
+        async function saveClientPassword(e) {
+            e.preventDefault();
+            if (!currentEditingClientId || !supabaseClient) return;
+
+            const newPass = document.getElementById('pwd-modal-input').value.trim();
+            try {
+                const { error } = await supabaseClient
+                    .from('clientes')
+                    .update({ pass: newPass })
+                    .eq('id', currentEditingClientId);
+
+                if (error) throw error;
+
+                const target = clients.find(x => String(x.id) === String(currentEditingClientId));
+                if (target) target.pass = newPass;
+                renderUI();
+
+                closeClientPasswordModal();
+                alert('Palavra-passe do cliente atualizada com sucesso no Supabase!');
+                await fetchClientsFromSupabase();
+            } catch (err) {
+                alert('Erro ao atualizar palavra-passe: ' + (err.message || err));
+            }
+        }
+
+        // ==========================================
+        // 8. GESTÃO DE UTILIZADORES DO SISTEMA (ROOT)
         // ==========================================
         async function openUserMgmtModal() {
             if (!currentUser || currentUser.role !== 'root') {
@@ -868,7 +1361,7 @@
         }
 
         // ==========================================
-        // 4. ALTERAR A MINHA PRÓPRIA SENHA
+        // 9. ALTERAR A MINHA PRÓPRIA SENHA
         // ==========================================
         function openChangeMyPasswordModal() {
             document.getElementById('my-pwd-old').value = '';
@@ -916,260 +1409,7 @@
         }
 
         // ==========================================
-        // 5. GESTÃO DE CLIENTES TV NO SUPABASE
-        // ==========================================
-        async function fetchClientsFromSupabase() {
-            if (!supabaseClient) return;
-            try {
-                const { data, error } = await supabaseClient
-                    .from('clientes')
-                    .select('*')
-                    .order('date', { ascending: true });
-
-                if (error) throw error;
-                clients = data || [];
-                renderUI();
-            } catch (err) {
-                console.error('Erro ao ler clientes do Supabase:', err);
-            }
-        }
-
-        function setupRealtime() {
-            if (!supabaseClient) return;
-            try {
-                if (realtimeSubscription) {
-                    supabaseClient.removeChannel(realtimeSubscription);
-                }
-                realtimeSubscription = supabaseClient
-                    .channel('clientes_realtime_sync')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'clientes' }, () => {
-                        fetchClientsFromSupabase();
-                    })
-                    .subscribe();
-            } catch (e) {
-                console.warn('Realtime subscription error:', e);
-            }
-        }
-
-        function openModal(id = null) {
-            const modal = document.getElementById('client-modal');
-            const passInput = document.getElementById('c-pass');
-            const eyeIcon = document.getElementById('eye-modal-pass');
-            passInput.type = 'password';
-            eyeIcon.className = 'fa-solid fa-eye';
-
-            if (id !== null && id !== undefined) {
-                const c = clients.find(x => String(x.id) === String(id));
-                if (!c) return;
-                document.getElementById('modal-title').innerText = 'Editar Cliente';
-                document.getElementById('client-id').value = String(c.id);
-                document.getElementById('c-name').value = c.name ?? '';
-                document.getElementById('c-phone').value = c.phone ?? '';
-                document.getElementById('c-service').value = c.service ?? '';
-                document.getElementById('c-price').value = Number(c.price ?? 0);
-                document.getElementById('c-user').value = c.user ?? '';
-                document.getElementById('c-pass').value = c.pass ?? '';
-                document.getElementById('c-link').value = c.link ?? '';
-                document.getElementById('c-date').value = c.date ?? '';
-            } else {
-                document.getElementById('modal-title').innerText = 'Novo Cliente de Serviço TV';
-                document.getElementById('client-form').reset();
-                document.getElementById('client-id').value = '';
-                document.getElementById('c-date').value = new Date().toISOString().split('T')[0];
-            }
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('client-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        async function saveClient(e) {
-            e.preventDefault();
-            if (!supabaseClient) {
-                alert('Supabase não conectado.');
-                return;
-            }
-
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Guardar no Supabase';
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> A guardar...';
-            }
-
-            const existingId = document.getElementById('client-id').value.trim();
-            const clientData = {
-                name: document.getElementById('c-name').value.trim(),
-                phone: document.getElementById('c-phone').value.trim(),
-                service: document.getElementById('c-service').value.trim(),
-                price: parseFloat(document.getElementById('c-price').value) || 0,
-                user: document.getElementById('c-user').value.trim(),
-                pass: document.getElementById('c-pass').value.trim(),
-                link: document.getElementById('c-link').value.trim(),
-                date: document.getElementById('c-date').value
-            };
-
-            try {
-                let savedClient = null;
-
-                if (existingId) {
-                    const { data, error } = await supabaseClient
-                        .from('clientes')
-                        .update(clientData)
-                        .eq('id', existingId)
-                        .select();
-                    if (error) throw error;
-                    if (data && data.length > 0) savedClient = data[0];
-                } else {
-                    const { data, error } = await supabaseClient
-                        .from('clientes')
-                        .insert([clientData])
-                        .select();
-                    if (error) throw error;
-                    if (data && data.length > 0) savedClient = data[0];
-                }
-
-                closeModal();
-
-                // Limpa filtros de pesquisa para o novo cliente ficar imediatamente visível
-                const searchInput = document.getElementById('search-input');
-                if (searchInput) searchInput.value = '';
-                const filterStatus = document.getElementById('filter-status');
-                if (filterStatus) filterStatus.value = 'all';
-
-                // Atualização instantânea em memória (0ms de atraso)
-                if (savedClient) {
-                    if (existingId) {
-                        const idx = clients.findIndex(x => String(x.id) === String(existingId));
-                        if (idx !== -1) clients[idx] = savedClient;
-                        else clients.unshift(savedClient);
-                    } else {
-                        clients.unshift(savedClient);
-                    }
-                    renderUI();
-                }
-
-                // Sincronização em segundo plano com o Supabase
-                await fetchClientsFromSupabase();
-            } catch (err) {
-                console.error('Erro ao guardar cliente:', err);
-                alert('Erro ao guardar no Supabase: ' + (err.message || err));
-            } finally {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnText;
-                }
-            }
-        }
-
-        async function deleteClient(id) {
-            const target = clients.find(x => String(x.id) === String(id));
-            if (!target) return;
-            if (!confirm(`Tem a certeza de que deseja apagar definitivamente o cliente "${target.name}" da base de dados Supabase?`)) {
-                return;
-            }
-
-            try {
-                // Remove imediatamente da interface (otimista)
-                clients = clients.filter(x => String(x.id) !== String(id));
-                renderUI();
-
-                const { error } = await supabaseClient
-                    .from('clientes')
-                    .delete()
-                    .eq('id', id);
-
-                if (error) {
-                    await fetchClientsFromSupabase();
-                    throw error;
-                }
-            } catch (err) {
-                console.error('Erro ao eliminar cliente:', err);
-                alert('Erro ao eliminar no Supabase: ' + (err.message || err));
-                await fetchClientsFromSupabase();
-            }
-        }
-
-        // ==========================================
-        // 6. GESTÃO DE SENHA DO CLIENTE (RÁPIDO)
-        // ==========================================
-        function generatePasswordForForm() {
-            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
-            let res = '';
-            for (let i = 0; i < 9; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-            const input = document.getElementById('c-pass');
-            input.value = res;
-            input.type = 'text';
-            document.getElementById('eye-modal-pass').className = 'fa-solid fa-eye-slash';
-        }
-
-        function openClientPasswordModal(id) {
-            const c = clients.find(x => String(x.id) === String(id));
-            if (!c) return;
-            currentEditingClientId = String(id);
-            document.getElementById('pwd-modal-client-name').innerText = c.name;
-            document.getElementById('pwd-modal-client-user').innerText = c.user || 'Sem utilizador';
-            document.getElementById('pwd-modal-input').value = c.pass || '';
-
-            const modal = document.getElementById('client-password-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeClientPasswordModal() {
-            currentEditingClientId = null;
-            const modal = document.getElementById('client-password-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        function generatePasswordForQuickModal() {
-            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
-            let res = '';
-            for (let i = 0; i < 9; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-            document.getElementById('pwd-modal-input').value = res;
-        }
-
-        function copyModalPassword() {
-            const val = document.getElementById('pwd-modal-input').value;
-            if (!val) return;
-            navigator.clipboard.writeText(val);
-            alert('Palavra-passe copiada!');
-        }
-
-        async function saveClientPassword(e) {
-            e.preventDefault();
-            if (!currentEditingClientId || !supabaseClient) return;
-
-            const newPass = document.getElementById('pwd-modal-input').value.trim();
-            try {
-                const { error } = await supabaseClient
-                    .from('clientes')
-                    .update({ pass: newPass })
-                    .eq('id', currentEditingClientId);
-
-                if (error) throw error;
-
-                // Atualização instantânea em memória
-                const target = clients.find(x => String(x.id) === String(currentEditingClientId));
-                if (target) target.pass = newPass;
-                renderUI();
-
-                closeClientPasswordModal();
-                alert('Palavra-passe do cliente atualizada com sucesso no Supabase!');
-                await fetchClientsFromSupabase();
-            } catch (err) {
-                alert('Erro ao atualizar palavra-passe: ' + (err.message || err));
-            }
-        }
-
-        // ==========================================
-        // 7. UPLOAD & DOWNLOAD CSV PARA O SUPABASE
+        // 10. UPLOAD & DOWNLOAD CSV PARA O SUPABASE
         // ==========================================
         async function uploadCSVToSupabase(event) {
             const file = event.target.files[0];
@@ -1200,10 +1440,13 @@
                         name: c.name || 'Sem Nome',
                         phone: c.phone || '',
                         service: c.service || '',
+                        box: c.box || '',
                         price: parseFloat(c.price) || 0,
                         user: c.user || '',
                         pass: c.pass || '',
                         link: c.link || '',
+                        observacao: c.observacao || '',
+                        ficheiros: [],
                         date: c.date || new Date().toISOString().split('T')[0]
                     }));
 
@@ -1216,6 +1459,7 @@
 
                     if (data && data.length > 0) {
                         clients = [...data, ...clients];
+                        updateFormDatalists();
                         renderUI();
                     }
 
@@ -1279,27 +1523,31 @@
                 if (!line) continue;
                 const cols = parseLine(line);
 
-                if (cols.length >= 9) {
+                if (cols.length >= 11) {
                     parsedClients.push({
                         name: cols[1] || 'Sem Nome',
                         phone: cols[2] || '',
                         service: cols[3] || '',
+                        box: cols[4] || '',
+                        user: cols[5] || '',
+                        pass: cols[6] || '',
+                        link: cols[7] || '',
+                        price: parseFloat(String(cols[8]).replace(',', '.')) || 0,
+                        date: cols[9] || new Date().toISOString().split('T')[0],
+                        observacao: cols[10] || ''
+                    });
+                } else if (cols.length >= 9) {
+                    parsedClients.push({
+                        name: cols[1] || 'Sem Nome',
+                        phone: cols[2] || '',
+                        service: cols[3] || '',
+                        box: '',
                         user: cols[4] || '',
                         pass: cols[5] || '',
                         link: cols[6] || '',
                         price: parseFloat(String(cols[7]).replace(',', '.')) || 0,
-                        date: cols[8] || new Date().toISOString().split('T')[0]
-                    });
-                } else if (cols.length >= 8) {
-                    parsedClients.push({
-                        name: cols[0] || 'Sem Nome',
-                        phone: cols[1] || '',
-                        service: cols[2] || '',
-                        user: cols[3] || '',
-                        pass: cols[4] || '',
-                        link: cols[5] || '',
-                        price: parseFloat(String(cols[6]).replace(',', '.')) || 0,
-                        date: cols[7] || new Date().toISOString().split('T')[0]
+                        date: cols[8] || new Date().toISOString().split('T')[0],
+                        observacao: ''
                     });
                 }
             }
@@ -1312,7 +1560,7 @@
                 return;
             }
 
-            const headers = ['ID', 'Nome', 'Contacto', 'Servico', 'Utilizador', 'Password', 'Link', 'Valor', 'DataVencimento'];
+            const headers = ['ID', 'Nome', 'Contacto', 'Servico', 'Box', 'Utilizador', 'Password', 'Link', 'Valor', 'DataVencimento', 'Observacoes'];
             const escapeCSV = (val) => `"${String(val ?? '').replace(/"/g, '""').trim()}"`;
 
             let rows = [headers.join(';')];
@@ -1322,11 +1570,13 @@
                     escapeCSV(c.name),
                     escapeCSV(c.phone),
                     escapeCSV(c.service),
+                    escapeCSV(c.box || ''),
                     escapeCSV(c.user),
                     escapeCSV(c.pass),
                     escapeCSV(c.link),
                     escapeCSV(Number(c.price || 0).toFixed(2)),
-                    escapeCSV(c.date)
+                    escapeCSV(c.date),
+                    escapeCSV(c.observacao || '')
                 ].join(';'));
             });
 
@@ -1342,7 +1592,7 @@
         }
 
         // ==========================================
-        // 8. RENDERIZAÇÃO DA TABELA & CARTÕES
+        // 11. RENDERIZAÇÃO DA TABELA & CARTÕES
         // ==========================================
         function escapeHTML(str) {
             return String(str ?? '')
@@ -1407,7 +1657,7 @@
                 return;
             }
             const cleanPhone = String(c.phone).replace(/\D/g, '');
-            const msg = `Olá ${c.name}, lembrete do seu serviço de TV (${c.service}). O valor de ${Number(c.price || 0).toFixed(2)}€ tem vencimento a ${c.date}. Utilizador: ${c.user || '-'}. Obrigado!`;
+            const msg = `Olá ${c.name}, lembrete do seu serviço de TV (${c.service}${c.box ? ' - ' + c.box : ''}). O valor de ${Number(c.price || 0).toFixed(2)}€ tem vencimento a ${c.date}. Utilizador: ${c.user || '-'}. Obrigado!`;
             window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
@@ -1419,10 +1669,13 @@
             const searchInput = document.getElementById('search-input');
             let query = (searchInput?.value ?? '').toLowerCase().trim();
 
-            // Proteção contra autopreenchimento de credenciais pelo navegador
-            if (query === 'admin' || (currentUser && query === (currentUser.username || '').toLowerCase())) {
+            // Blindagem: se o utilizador não digitou nada ativamente no teclado, não permitir que autofill filtre
+            if (!userHasTypedInSearch && query) {
                 query = '';
-                if (searchInput) searchInput.value = '';
+                if (searchInput) {
+                    searchInput.value = '';
+                    searchInput.setAttribute('readonly', 'readonly');
+                }
                 const btnClear = document.getElementById('btn-clear-search');
                 if (btnClear) btnClear.classList.add('hidden');
             }
@@ -1437,7 +1690,7 @@
                 else if (st === 'warning') warningCount++;
                 else overdueCount++;
 
-                const haystack = [c.name, c.phone, c.service, c.user, c.link]
+                const haystack = [c.name, c.phone, c.service, c.box, c.user, c.link, c.observacao]
                     .map(v => String(v ?? '').toLowerCase())
                     .join(' ');
 
@@ -1470,16 +1723,26 @@
                 const passDisplay = c.pass
                     ? (isPassVisible ? escapeHTML(c.pass) : '••••••••')
                     : '-';
+                
+                const hasFiles = Array.isArray(c.ficheiros) && c.ficheiros.length > 0;
+                const hasObs = !!(c.observacao && c.observacao.trim());
 
                 // Desktop Row
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/40 transition';
                 tr.innerHTML = `
                     <td class="p-4">
-                        <div class="font-semibold text-white">${escapeHTML(c.name)}</div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-white">${escapeHTML(c.name)}</span>
+                            ${hasObs ? `<span title="${escapeHTML(c.observacao)}" class="cursor-help text-amber-400 text-xs"><i class="fa-solid fa-note-sticky"></i></span>` : ''}
+                            ${hasFiles ? `<button onclick="openViewFilesModal('${safeId}')" class="text-[10px] bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white px-1.5 py-0.5 rounded border border-blue-500/20 flex items-center gap-1 transition" title="Ver ${c.ficheiros.length} ficheiro(s)"><i class="fa-solid fa-paperclip"></i> ${c.ficheiros.length}</button>` : ''}
+                        </div>
                         <div class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-phone mr-1"></i>${escapeHTML(c.phone || 'Sem contacto')}</div>
                     </td>
-                    <td class="p-4 text-slate-200 font-medium">${escapeHTML(c.service)}</td>
+                    <td class="p-4">
+                        <div class="text-slate-200 font-medium">${escapeHTML(c.service)}</div>
+                        ${c.box ? `<div class="text-xs text-purple-400 font-medium flex items-center gap-1 mt-0.5"><i class="fa-solid fa-box text-[10px]"></i> ${escapeHTML(c.box)}</div>` : ''}
+                    </td>
                     <td class="p-4">
                         <div class="text-xs text-slate-300 flex items-center gap-1.5">
                             <span><b>U:</b> ${escapeHTML(c.user || '-')}</span>
@@ -1501,7 +1764,10 @@
                         ${c.link ? `<a href="${escapeHTML(c.link)}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-400 hover:underline truncate block max-w-[180px]" title="${escapeHTML(c.link)}"><i class="fa-solid fa-up-right-from-square mr-1"></i>Abrir Link</a>` : '<span class="text-xs text-slate-500">-</span>'}
                     </td>
                     <td class="p-4 font-semibold text-white whitespace-nowrap">${Number(c.price || 0).toFixed(2)} €</td>
-                    <td class="p-4 text-slate-300 whitespace-nowrap">${escapeHTML(c.date)}</td>
+                    <td class="p-4 whitespace-nowrap">
+                        <div class="text-slate-200">${escapeHTML(c.date)}</div>
+                        ${c.updated_at ? `<div class="text-[10px] text-slate-500" title="Última atualização: ${new Date(c.updated_at).toLocaleString('pt-PT')}">At: ${new Date(c.updated_at).toLocaleDateString('pt-PT')}</div>` : ''}
+                    </td>
                     <td class="p-4 whitespace-nowrap">${badge}</td>
                     <td class="p-4 text-right whitespace-nowrap space-x-1">
                         <button onclick="sendWhatsApp('${safeId}')" class="p-2 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-lg transition" title="Avisar por WhatsApp">
@@ -1526,7 +1792,10 @@
                 card.innerHTML = `
                     <div class="flex justify-between items-start gap-2">
                         <div>
-                            <h4 class="font-bold text-white text-base">${escapeHTML(c.name)}</h4>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-white text-base">${escapeHTML(c.name)}</h4>
+                                ${hasFiles ? `<button onclick="openViewFilesModal('${safeId}')" class="text-[10px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20"><i class="fa-solid fa-paperclip"></i> ${c.ficheiros.length}</button>` : ''}
+                            </div>
                             <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-phone mr-1"></i>${escapeHTML(c.phone || 'Sem contacto')}</p>
                         </div>
                         ${badge}
@@ -1535,6 +1804,7 @@
                         <div>
                             <span class="text-slate-400 block">Serviço:</span>
                             <span class="text-white font-medium">${escapeHTML(c.service)}</span>
+                            ${c.box ? `<span class="text-purple-400 block text-[11px] mt-0.5"><i class="fa-solid fa-box text-[9px] mr-1"></i>${escapeHTML(c.box)}</span>` : ''}
                         </div>
                         <div>
                             <span class="text-slate-400 block">Valor / Vencimento:</span>
@@ -1557,6 +1827,12 @@
                                 ` : ''}
                             </div>
                         </div>
+                        ${hasObs ? `
+                            <div class="col-span-2 pt-1 border-t border-slate-800 text-slate-300">
+                                <span class="text-slate-400 block text-[10px]">Observações:</span>
+                                <span>${escapeHTML(c.observacao)}</span>
+                            </div>
+                        ` : ''}
                     </div>
                     <div class="flex items-center justify-between pt-1">
                         <div>
@@ -1583,7 +1859,7 @@
         }
 
         // ==========================================
-        // 9. EXPORTAÇÃO PDF
+        // 12. EXPORTAÇÃO PDF
         // ==========================================
         function exportPDF() {
             if (clients.length === 0) {
@@ -1612,16 +1888,17 @@
                 c.name || '-',
                 c.phone || '-',
                 c.service || '-',
+                c.box || '-',
                 c.user || '-',
-                c.link || '-',
                 `${Number(c.price || 0).toFixed(2)} €`,
                 c.date || '-',
-                statusLabel(c.date)
+                statusLabel(c.date),
+                c.observacao || '-'
             ]);
 
             doc.autoTable({
                 startY: 30,
-                head: [['Cliente', 'Contacto', 'Serviço TV', 'Utilizador', 'Link', 'Valor', 'Vencimento', 'Estado']],
+                head: [['Cliente', 'Contacto', 'Serviço TV', 'Box / Dispositivo', 'Utilizador', 'Valor', 'Vencimento', 'Estado', 'Notas']],
                 body: body,
                 theme: 'striped',
                 styles: { fontSize: 8, cellPadding: 3 },
@@ -1632,7 +1909,7 @@
         }
 
         // ==========================================
-        // 10. CONFIGURAÇÃO SUPABASE
+        // 13. CONFIGURAÇÃO SUPABASE
         // ==========================================
         function openConfigModal() {
             document.getElementById('cfg-supabase-url').value = localStorage.getItem(SUPABASE_STORAGE_URL) || '';
