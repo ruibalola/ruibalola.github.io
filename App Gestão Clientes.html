@@ -188,12 +188,12 @@
                 </div>
             </div>
 
-            <!-- Pesquisa e Filtros -->
-            <div class="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between shadow-lg">
+            <!-- Pesquisa e Filtros (Isolados em form de pesquisa próprio para impedir autopreenchimento de credenciais) -->
+            <form role="search" onsubmit="event.preventDefault();" autocomplete="off" class="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between shadow-lg">
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
                     <div class="relative flex-1">
                         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 pointer-events-none"><i class="fa-solid fa-search"></i></span>
-                        <input type="text" id="search-input" value="" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="handleSearchInput()" placeholder="Pesquisar cliente, contacto, user, serviço ou link..." class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-10 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <input type="search" id="search-input" name="search_clients_query" value="" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="handleSearchInput()" placeholder="Pesquisar cliente, contacto, user, serviço ou link..." class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-10 text-sm text-white focus:outline-none focus:border-blue-500">
                         <button type="button" id="btn-clear-search" onclick="clearSearchInput()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white" title="Limpar pesquisa">
                             <i class="fa-solid fa-circle-xmark text-sm"></i>
                         </button>
@@ -205,7 +205,7 @@
                         <option value="overdue">Em Atraso</option>
                     </select>
                 </div>
-            </div>
+            </form>
 
             <!-- VISTA DESKTOP (TABELA) -->
             <div class="hidden md:block bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
@@ -329,7 +329,9 @@
                 </div>
                 <button onclick="closeChangeMyPasswordModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form onsubmit="handleSaveMyPassword(event)" class="p-5 sm:p-6 space-y-4">
+            <form onsubmit="handleSaveMyPassword(event)" autocomplete="off" class="p-5 sm:p-6 space-y-4">
+                <!-- Campo oculto para evitar que o gestor de senhas do navegador associe ao search-input -->
+                <input type="text" name="username" autocomplete="username" class="hidden" style="display:none;" aria-hidden="true" tabindex="-1">
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Palavra-passe Atual *</label>
                     <input type="password" id="my-pwd-old" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
@@ -580,6 +582,12 @@
             // Limpa explicitamente a pesquisa para mostrar todos os clientes sem filtros
             clearSearchInput(false);
 
+            // Proteção contra autopreenchimento assíncrono de passwords do navegador
+            setTimeout(sanitizeSearchInput, 50);
+            setTimeout(sanitizeSearchInput, 200);
+            setTimeout(sanitizeSearchInput, 500);
+            setTimeout(sanitizeSearchInput, 1000);
+
             document.getElementById('logged-user-display').innerText = user.username || user.nome;
             const badge = document.getElementById('logged-user-role-badge');
             badge.innerText = (user.role || 'ADMIN').toUpperCase();
@@ -589,6 +597,19 @@
             if (btnMgmt) {
                 if (user.role === 'root') btnMgmt.classList.remove('hidden');
                 else btnMgmt.classList.add('hidden');
+            }
+        }
+
+        function sanitizeSearchInput() {
+            const input = document.getElementById('search-input');
+            if (!input) return;
+            const val = input.value.trim().toLowerCase();
+            // Se o navegador inseriu automaticamente o utilizador de login no campo de pesquisa
+            if (val === 'admin' || (currentUser && val === (currentUser.username || '').toLowerCase())) {
+                input.value = '';
+                const btn = document.getElementById('btn-clear-search');
+                if (btn) btn.classList.add('hidden');
+                renderUI();
             }
         }
 
@@ -611,6 +632,10 @@
             if (filterStatus) filterStatus.value = 'all';
             if (shouldRender) renderUI();
         }
+
+        window.addEventListener('focus', () => {
+            sanitizeSearchInput();
+        });
 
         async function handleLoginSubmit(e) {
             e.preventDefault();
@@ -1391,7 +1416,17 @@
             const mobileContainer = document.getElementById('clients-mobile');
             if (!tbody || !mobileContainer) return;
 
-            const query = (document.getElementById('search-input')?.value ?? '').toLowerCase().trim();
+            const searchInput = document.getElementById('search-input');
+            let query = (searchInput?.value ?? '').toLowerCase().trim();
+
+            // Proteção contra autopreenchimento de credenciais pelo navegador
+            if (query === 'admin' || (currentUser && query === (currentUser.username || '').toLowerCase())) {
+                query = '';
+                if (searchInput) searchInput.value = '';
+                const btnClear = document.getElementById('btn-clear-search');
+                if (btnClear) btnClear.classList.add('hidden');
+            }
+
             const statusFilter = document.getElementById('filter-status')?.value ?? 'all';
 
             let activeCount = 0, warningCount = 0, overdueCount = 0;
