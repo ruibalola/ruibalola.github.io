@@ -41,7 +41,7 @@
                 <p class="text-xs text-slate-400">Acesso Restrito ao Painel de Administração</p>
             </div>
 
-            <!-- Aviso das credenciais iniciais para o primeiro acesso -->
+            <!-- Aviso das credenciais iniciais para o primeiro acesso 
             <div id="login-initial-hint"
                 class="bg-blue-950/40 border border-blue-500/30 rounded-xl p-3 text-xs text-blue-200 flex items-start gap-2.5">
                 <i class="fa-solid fa-circle-info text-blue-400 mt-0.5"></i>
@@ -52,7 +52,7 @@
                     <p class="text-[11px] text-slate-400 mt-0.5">Poderá alterar a senha e gerir utilizadores após
                         entrar.</p>
                 </div>
-            </div>
+            </div>-->
 
             <!-- Formulário de Login -->
             <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
@@ -1982,66 +1982,66 @@
         // 12. RENDERIZAÇÃO DA TABELA & CARTÕES
         // ==========================================
         function escapeHTML(str) {
-                return String(str ?? '')
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;');
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function toggleFormPassword() {
+            const input = document.getElementById('c-pass');
+            const icon = document.getElementById('eye-modal-pass');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
             }
+        }
 
-            function toggleFormPassword() {
-                const input = document.getElementById('c-pass');
-                const icon = document.getElementById('eye-modal-pass');
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.className = 'fa-solid fa-eye-slash';
-                } else {
-                    input.type = 'password';
-                    icon.className = 'fa-solid fa-eye';
-                }
+        function toggleRowPassword(id) {
+            visiblePasswords[id] = !visiblePasswords[id];
+            renderUI();
+        }
+
+        function copyToClipboard(text) {
+            if (!text) return;
+            navigator.clipboard.writeText(text);
+        }
+
+        function getStatus(dateStr) {
+            if (!dateStr) return 'active';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return 'active';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const due = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            due.setHours(0, 0, 0, 0);
+
+            const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+            if (diffDays < 0) return 'overdue';
+            if (diffDays <= 7) return 'warning';
+            return 'active';
+        }
+
+        function getStatusBadge(status) {
+            if (status === 'active') {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle text-[6px]"></i> Regular</span>`;
             }
-
-            function toggleRowPassword(id) {
-                visiblePasswords[id] = !visiblePasswords[id];
-                renderUI();
+            if (status === 'warning') {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fa-solid fa-circle text-[6px]"></i> A Vencer</span>`;
             }
+            return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-circle text-[6px]"></i> Em Atraso</span>`;
+        }
 
-            function copyToClipboard(text) {
-                if (!text) return;
-                navigator.clipboard.writeText(text);
-            }
-
-            function getStatus(dateStr) {
-                if (!dateStr) return 'active';
-                const parts = dateStr.split('-');
-                if (parts.length !== 3) return 'active';
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const due = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-                due.setHours(0, 0, 0, 0);
-
-                const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-                if (diffDays < 0) return 'overdue';
-                if (diffDays <= 7) return 'warning';
-                return 'active';
-            }
-
-            function getStatusBadge(status) {
-                if (status === 'active') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle text-[6px]"></i> Regular</span>`;
-                }
-                if (status === 'warning') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fa-solid fa-circle text-[6px]"></i> A Vencer</span>`;
-                }
-                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-circle text-[6px]"></i> Em Atraso</span>`;
-            }
-
-            // ==========================================
-            // 11. SISTEMA DE TEMPLATE E ENVIO WHATSAPP
-            // ==========================================
-            const WA_TEMPLATE_STORAGE_KEY = 'gestao_tv_wa_template';
-            const DEFAULT_WA_TEMPLATE = `Olá {nome}!
+        // ==========================================
+        // 11. SISTEMA DE TEMPLATE E ENVIO WHATSAPP
+        // ==========================================
+        const WA_TEMPLATE_STORAGE_KEY = 'gestao_tv_wa_template';
+        const DEFAULT_WA_TEMPLATE = `Olá {nome}!
 Lembrete do seu serviço TV: {servico}{detalhes_equipamento}.
 O valor de {valor}€ tem vencimento a {vencimento}.
 Dados de acesso:
@@ -2050,14 +2050,14 @@ Dados de acesso:
 • Painel: {link}
 Obrigado!`;
 
-            const WA_PRESETS = {
-                lembrete: `Olá {nome}!
+        const WA_PRESETS = {
+            lembrete: `Olá {nome}!
 Lembrete do seu serviço TV: {servico}{detalhes_equipamento}.
 O valor de {valor}€ tem vencimento a {vencimento}.
 Por favor confirme o envio do comprovativo assim que efetuar a renovação.
 Obrigado!`,
 
-                acessos: `Olá {nome}!
+            acessos: `Olá {nome}!
 Aqui estão os seus dados de acesso ao serviço {servico}:
 • Equipamento: {marca} {box}
 • Utilizador: {user}
@@ -2066,7 +2066,7 @@ Aqui estão os seus dados de acesso ao serviço {servico}:
 • Vencimento: {vencimento}
 Bom proveito!`,
 
-                completo: `Olá {nome}!
+            completo: `Olá {nome}!
 Informações da sua conta de TV ({servico}):
 • Equipamento: {marca} {box}
 • Valor: {valor}€
@@ -2075,232 +2075,232 @@ Informações da sua conta de TV ({servico}):
 • Senha: {pass}
 • Painel: {link}
 Obrigado pela preferência!`
-            };
+        };
 
-            function getWhatsAppTemplate() {
-                const saved = localStorage.getItem(WA_TEMPLATE_STORAGE_KEY);
-                return (saved && saved.trim()) ? saved : DEFAULT_WA_TEMPLATE;
+        function getWhatsAppTemplate() {
+            const saved = localStorage.getItem(WA_TEMPLATE_STORAGE_KEY);
+            return (saved && saved.trim()) ? saved : DEFAULT_WA_TEMPLATE;
+        }
+
+        function openWhatsappTemplateModal() {
+            const currentTpl = getWhatsAppTemplate();
+            const input = document.getElementById('wa-template-input');
+            if (input) input.value = currentTpl;
+            updateWaTemplatePreview();
+            const modal = document.getElementById('whatsapp-template-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
             }
+        }
 
-            function openWhatsappTemplateModal() {
-                const currentTpl = getWhatsAppTemplate();
-                const input = document.getElementById('wa-template-input');
-                if (input) input.value = currentTpl;
-                updateWaTemplatePreview();
-                const modal = document.getElementById('whatsapp-template-modal');
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                }
+        function closeWhatsappTemplateModal() {
+            const modal = document.getElementById('whatsapp-template-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
             }
+        }
 
-            function closeWhatsappTemplateModal() {
-                const modal = document.getElementById('whatsapp-template-modal');
-                if (modal) {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                }
-            }
+        function insertWaTag(tag) {
+            const input = document.getElementById('wa-template-input');
+            if (!input) return;
+            const start = input.selectionStart || 0;
+            const end = input.selectionEnd || 0;
+            const text = input.value;
+            input.value = text.substring(0, start) + tag + text.substring(end);
+            input.focus();
+            input.selectionStart = input.selectionEnd = start + tag.length;
+            updateWaTemplatePreview();
+        }
 
-            function insertWaTag(tag) {
-                const input = document.getElementById('wa-template-input');
-                if (!input) return;
-                const start = input.selectionStart || 0;
-                const end = input.selectionEnd || 0;
-                const text = input.value;
-                input.value = text.substring(0, start) + tag + text.substring(end);
-                input.focus();
-                input.selectionStart = input.selectionEnd = start + tag.length;
-                updateWaTemplatePreview();
-            }
-
-            function applyWaPreset(presetKey) {
-                if (WA_PRESETS[presetKey]) {
-                    const input = document.getElementById('wa-template-input');
-                    if (input) {
-                        input.value = WA_PRESETS[presetKey];
-                        updateWaTemplatePreview();
-                    }
-                }
-            }
-
-            function restoreDefaultWaTemplate() {
+        function applyWaPreset(presetKey) {
+            if (WA_PRESETS[presetKey]) {
                 const input = document.getElementById('wa-template-input');
                 if (input) {
-                    input.value = DEFAULT_WA_TEMPLATE;
+                    input.value = WA_PRESETS[presetKey];
                     updateWaTemplatePreview();
                 }
             }
+        }
 
-            function saveWhatsappTemplate() {
-                const input = document.getElementById('wa-template-input');
-                if (!input) return;
-                const val = input.value.trim();
-                if (!val) {
-                    alert('O template não pode ficar vazio.');
-                    return;
+        function restoreDefaultWaTemplate() {
+            const input = document.getElementById('wa-template-input');
+            if (input) {
+                input.value = DEFAULT_WA_TEMPLATE;
+                updateWaTemplatePreview();
+            }
+        }
+
+        function saveWhatsappTemplate() {
+            const input = document.getElementById('wa-template-input');
+            if (!input) return;
+            const val = input.value.trim();
+            if (!val) {
+                alert('O template não pode ficar vazio.');
+                return;
+            }
+            localStorage.setItem(WA_TEMPLATE_STORAGE_KEY, val);
+            closeWhatsappTemplateModal();
+            alert('Template de WhatsApp guardado com sucesso!');
+        }
+
+        function updateWaTemplatePreview() {
+            const input = document.getElementById('wa-template-input');
+            const preview = document.getElementById('wa-template-preview');
+            if (!input || !preview) return;
+
+            const sampleClient = {
+                name: 'João Silva',
+                service: 'IPTV Premium',
+                marca_equipamento: 'Xiaomi',
+                box: 'Mi Box S 4K',
+                price: 15.00,
+                date: '2026-11-25',
+                user: 'cliente_joao',
+                pass: 'tv123456',
+                link: 'http://meupainel.tv:8080',
+                observacao: 'Cliente VIP'
+            };
+
+            let sampleMsg = input.value || '';
+            const formattedDate = '25/11/2026';
+            const eqParts = [sampleClient.marca_equipamento, sampleClient.box].filter(Boolean);
+            const eqStr = eqParts.length > 0 ? ` (${eqParts.join(' ')})` : '';
+
+            const replaceToken = (text, token, val) => {
+                const reg = new RegExp(`\\{\\{?${token}\\}?\\}`, 'gi');
+                return text.replace(reg, val);
+            };
+
+            sampleMsg = replaceToken(sampleMsg, 'detalhes_equipamento', eqStr);
+            sampleMsg = replaceToken(sampleMsg, 'nome', sampleClient.name);
+            sampleMsg = replaceToken(sampleMsg, 'servico', sampleClient.service);
+            sampleMsg = replaceToken(sampleMsg, 'marca', sampleClient.marca_equipamento);
+            sampleMsg = replaceToken(sampleMsg, 'box', sampleClient.box);
+            sampleMsg = replaceToken(sampleMsg, 'valor', Number(sampleClient.price).toFixed(2));
+            sampleMsg = replaceToken(sampleMsg, 'vencimento', formattedDate);
+            sampleMsg = replaceToken(sampleMsg, 'user', sampleClient.user);
+            sampleMsg = replaceToken(sampleMsg, 'pass', sampleClient.pass);
+            sampleMsg = replaceToken(sampleMsg, 'link', sampleClient.link);
+            sampleMsg = replaceToken(sampleMsg, 'obs', sampleClient.observacao);
+
+            sampleMsg = sampleMsg.replace(/\(\s*\)/g, '').replace(/  +/g, ' ');
+            preview.textContent = sampleMsg;
+        }
+
+        function buildWhatsAppMessage(c) {
+            const template = getWhatsAppTemplate();
+            const formattedDate = c.date ? c.date.split('-').reverse().join('/') : '-';
+            const eqParts = [c.marca_equipamento, c.box].filter(Boolean);
+            const eqStr = eqParts.length > 0 ? ` (${eqParts.join(' ')})` : '';
+
+            const replaceToken = (text, token, val) => {
+                const reg = new RegExp(`\\{\\{?${token}\\}?\\}`, 'gi');
+                return text.replace(reg, val);
+            };
+
+            let msg = template;
+            msg = replaceToken(msg, 'detalhes_equipamento', eqStr);
+            msg = replaceToken(msg, 'nome', c.name || '');
+            msg = replaceToken(msg, 'servico', c.service || '');
+            msg = replaceToken(msg, 'marca', c.marca_equipamento || '');
+            msg = replaceToken(msg, 'box', c.box || '');
+            msg = replaceToken(msg, 'valor', Number(c.price || 0).toFixed(2));
+            msg = replaceToken(msg, 'vencimento', formattedDate);
+            msg = replaceToken(msg, 'user', c.user || '-');
+            msg = replaceToken(msg, 'pass', c.pass || '-');
+            msg = replaceToken(msg, 'link', c.link || '-');
+            msg = replaceToken(msg, 'obs', c.observacao || '');
+
+            msg = msg.replace(/\(\s*\)/g, '').replace(/  +/g, ' ');
+            return msg.trim();
+        }
+
+        function sendWhatsApp(id) {
+            const c = clients.find(x => String(x.id) === String(id));
+            if (!c || !c.phone) {
+                alert('Este cliente não tem número de telefone registado.');
+                return;
+            }
+            let cleanPhone = String(c.phone).replace(/\D/g, '');
+            if (cleanPhone.length === 9 && (cleanPhone.startsWith('9') || cleanPhone.startsWith('2'))) {
+                cleanPhone = '351' + cleanPhone;
+            }
+            const msg = buildWhatsAppMessage(c);
+            window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function renderUI() {
+            const tbody = document.getElementById('clients-tbody');
+            const mobileContainer = document.getElementById('clients-mobile');
+            if (!tbody || !mobileContainer) return;
+
+            const searchInput = document.getElementById('search-input');
+            let query = (searchInput?.value ?? '').toLowerCase().trim();
+
+            // Blindagem: se o utilizador não digitou nada ativamente no teclado, não permitir que autofill filtre
+            if (!userHasTypedInSearch && query) {
+                query = '';
+                if (searchInput) {
+                    searchInput.value = '';
+                    searchInput.setAttribute('readonly', 'readonly');
                 }
-                localStorage.setItem(WA_TEMPLATE_STORAGE_KEY, val);
-                closeWhatsappTemplateModal();
-                alert('Template de WhatsApp guardado com sucesso!');
+                const btnClear = document.getElementById('btn-clear-search');
+                if (btnClear) btnClear.classList.add('hidden');
             }
 
-            function updateWaTemplatePreview() {
-                const input = document.getElementById('wa-template-input');
-                const preview = document.getElementById('wa-template-preview');
-                if (!input || !preview) return;
+            const statusFilter = document.getElementById('filter-status')?.value ?? 'all';
 
-                const sampleClient = {
-                    name: 'João Silva',
-                    service: 'IPTV Premium',
-                    marca_equipamento: 'Xiaomi',
-                    box: 'Mi Box S 4K',
-                    price: 15.00,
-                    date: '2026-11-25',
-                    user: 'cliente_joao',
-                    pass: 'tv123456',
-                    link: 'http://meupainel.tv:8080',
-                    observacao: 'Cliente VIP'
-                };
+            let activeCount = 0, warningCount = 0, overdueCount = 0;
 
-                let sampleMsg = input.value || '';
-                const formattedDate = '25/11/2026';
-                const eqParts = [sampleClient.marca_equipamento, sampleClient.box].filter(Boolean);
-                const eqStr = eqParts.length > 0 ? ` (${eqParts.join(' ')})` : '';
+            const filtered = clients.filter(c => {
+                const st = getStatus(c.date);
+                if (st === 'active') activeCount++;
+                else if (st === 'warning') warningCount++;
+                else overdueCount++;
 
-                const replaceToken = (text, token, val) => {
-                    const reg = new RegExp(`\\{\\{?${token}\\}?\\}`, 'gi');
-                    return text.replace(reg, val);
-                };
+                const haystack = [c.name, c.phone, c.service, c.marca_equipamento, c.box, c.user, c.link, c.observacao]
+                    .map(v => String(v ?? '').toLowerCase())
+                    .join(' ');
 
-                sampleMsg = replaceToken(sampleMsg, 'detalhes_equipamento', eqStr);
-                sampleMsg = replaceToken(sampleMsg, 'nome', sampleClient.name);
-                sampleMsg = replaceToken(sampleMsg, 'servico', sampleClient.service);
-                sampleMsg = replaceToken(sampleMsg, 'marca', sampleClient.marca_equipamento);
-                sampleMsg = replaceToken(sampleMsg, 'box', sampleClient.box);
-                sampleMsg = replaceToken(sampleMsg, 'valor', Number(sampleClient.price).toFixed(2));
-                sampleMsg = replaceToken(sampleMsg, 'vencimento', formattedDate);
-                sampleMsg = replaceToken(sampleMsg, 'user', sampleClient.user);
-                sampleMsg = replaceToken(sampleMsg, 'pass', sampleClient.pass);
-                sampleMsg = replaceToken(sampleMsg, 'link', sampleClient.link);
-                sampleMsg = replaceToken(sampleMsg, 'obs', sampleClient.observacao);
+                const matchesSearch = !query || haystack.includes(query);
+                const matchesFilter = statusFilter === 'all' || st === statusFilter;
+                return matchesSearch && matchesFilter;
+            });
 
-                sampleMsg = sampleMsg.replace(/\(\s*\)/g, '').replace(/  +/g, ' ');
-                preview.textContent = sampleMsg;
+            document.getElementById('stat-total').innerText = clients.length;
+            document.getElementById('stat-active').innerText = activeCount;
+            document.getElementById('stat-warning').innerText = warningCount;
+            document.getElementById('stat-overdue').innerText = overdueCount;
+            document.getElementById('results-count').innerText = `A mostrar ${filtered.length} de ${clients.length} cliente(s) no Supabase`;
+
+            tbody.innerHTML = '';
+            mobileContainer.innerHTML = '';
+
+            if (filtered.length === 0) {
+                const emptyMsg = `<div class="p-8 text-center text-slate-500 text-sm">Nenhum cliente encontrado.</div>`;
+                tbody.innerHTML = `<tr><td colspan="8">${emptyMsg}</td></tr>`;
+                mobileContainer.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-2xl">${emptyMsg}</div>`;
+                return;
             }
 
-            function buildWhatsAppMessage(c) {
-                const template = getWhatsAppTemplate();
-                const formattedDate = c.date ? c.date.split('-').reverse().join('/') : '-';
-                const eqParts = [c.marca_equipamento, c.box].filter(Boolean);
-                const eqStr = eqParts.length > 0 ? ` (${eqParts.join(' ')})` : '';
+            filtered.forEach(c => {
+                const st = getStatus(c.date);
+                const badge = getStatusBadge(st);
+                const isPassVisible = !!visiblePasswords[c.id];
+                const safeId = escapeHTML(c.id);
+                const passDisplay = c.pass
+                    ? (isPassVisible ? escapeHTML(c.pass) : '••••••••')
+                    : '-';
 
-                const replaceToken = (text, token, val) => {
-                    const reg = new RegExp(`\\{\\{?${token}\\}?\\}`, 'gi');
-                    return text.replace(reg, val);
-                };
+                const hasFiles = Array.isArray(c.ficheiros) && c.ficheiros.length > 0;
+                const hasObs = !!(c.observacao && c.observacao.trim());
 
-                let msg = template;
-                msg = replaceToken(msg, 'detalhes_equipamento', eqStr);
-                msg = replaceToken(msg, 'nome', c.name || '');
-                msg = replaceToken(msg, 'servico', c.service || '');
-                msg = replaceToken(msg, 'marca', c.marca_equipamento || '');
-                msg = replaceToken(msg, 'box', c.box || '');
-                msg = replaceToken(msg, 'valor', Number(c.price || 0).toFixed(2));
-                msg = replaceToken(msg, 'vencimento', formattedDate);
-                msg = replaceToken(msg, 'user', c.user || '-');
-                msg = replaceToken(msg, 'pass', c.pass || '-');
-                msg = replaceToken(msg, 'link', c.link || '-');
-                msg = replaceToken(msg, 'obs', c.observacao || '');
-
-                msg = msg.replace(/\(\s*\)/g, '').replace(/  +/g, ' ');
-                return msg.trim();
-            }
-
-            function sendWhatsApp(id) {
-                const c = clients.find(x => String(x.id) === String(id));
-                if (!c || !c.phone) {
-                    alert('Este cliente não tem número de telefone registado.');
-                    return;
-                }
-                let cleanPhone = String(c.phone).replace(/\D/g, '');
-                if (cleanPhone.length === 9 && (cleanPhone.startsWith('9') || cleanPhone.startsWith('2'))) {
-                    cleanPhone = '351' + cleanPhone;
-                }
-                const msg = buildWhatsAppMessage(c);
-                window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-            }
-
-            function renderUI() {
-                const tbody = document.getElementById('clients-tbody');
-                const mobileContainer = document.getElementById('clients-mobile');
-                if (!tbody || !mobileContainer) return;
-
-                const searchInput = document.getElementById('search-input');
-                let query = (searchInput?.value ?? '').toLowerCase().trim();
-
-                // Blindagem: se o utilizador não digitou nada ativamente no teclado, não permitir que autofill filtre
-                if (!userHasTypedInSearch && query) {
-                    query = '';
-                    if (searchInput) {
-                        searchInput.value = '';
-                        searchInput.setAttribute('readonly', 'readonly');
-                    }
-                    const btnClear = document.getElementById('btn-clear-search');
-                    if (btnClear) btnClear.classList.add('hidden');
-                }
-
-                const statusFilter = document.getElementById('filter-status')?.value ?? 'all';
-
-                let activeCount = 0, warningCount = 0, overdueCount = 0;
-
-                const filtered = clients.filter(c => {
-                    const st = getStatus(c.date);
-                    if (st === 'active') activeCount++;
-                    else if (st === 'warning') warningCount++;
-                    else overdueCount++;
-
-                    const haystack = [c.name, c.phone, c.service, c.marca_equipamento, c.box, c.user, c.link, c.observacao]
-                        .map(v => String(v ?? '').toLowerCase())
-                        .join(' ');
-
-                    const matchesSearch = !query || haystack.includes(query);
-                    const matchesFilter = statusFilter === 'all' || st === statusFilter;
-                    return matchesSearch && matchesFilter;
-                });
-
-                document.getElementById('stat-total').innerText = clients.length;
-                document.getElementById('stat-active').innerText = activeCount;
-                document.getElementById('stat-warning').innerText = warningCount;
-                document.getElementById('stat-overdue').innerText = overdueCount;
-                document.getElementById('results-count').innerText = `A mostrar ${filtered.length} de ${clients.length} cliente(s) no Supabase`;
-
-                tbody.innerHTML = '';
-                mobileContainer.innerHTML = '';
-
-                if (filtered.length === 0) {
-                    const emptyMsg = `<div class="p-8 text-center text-slate-500 text-sm">Nenhum cliente encontrado.</div>`;
-                    tbody.innerHTML = `<tr><td colspan="8">${emptyMsg}</td></tr>`;
-                    mobileContainer.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-2xl">${emptyMsg}</div>`;
-                    return;
-                }
-
-                filtered.forEach(c => {
-                    const st = getStatus(c.date);
-                    const badge = getStatusBadge(st);
-                    const isPassVisible = !!visiblePasswords[c.id];
-                    const safeId = escapeHTML(c.id);
-                    const passDisplay = c.pass
-                        ? (isPassVisible ? escapeHTML(c.pass) : '••••••••')
-                        : '-';
-
-                    const hasFiles = Array.isArray(c.ficheiros) && c.ficheiros.length > 0;
-                    const hasObs = !!(c.observacao && c.observacao.trim());
-
-                    // Desktop Row
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-800/40 transition';
-                    tr.innerHTML = `
+                // Desktop Row
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.innerHTML = `
                     <td class="p-4">
                         <div class="flex items-center gap-2">
                             <span class="font-semibold text-white">${escapeHTML(c.name)}</span>
@@ -2357,12 +2357,12 @@ Obrigado pela preferência!`
                         </button>
                     </td>
                 `;
-                    tbody.appendChild(tr);
+                tbody.appendChild(tr);
 
-                    // Mobile Card
-                    const card = document.createElement('div');
-                    card.className = 'bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg';
-                    card.innerHTML = `
+                // Mobile Card
+                const card = document.createElement('div');
+                card.className = 'bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg';
+                card.innerHTML = `
                     <div class="flex justify-between items-start gap-2">
                         <div>
                             <div class="flex items-center gap-2">
@@ -2430,124 +2430,124 @@ Obrigado pela preferência!`
                         </div>
                     </div>
                 `;
-                    mobileContainer.appendChild(card);
-                });
+                mobileContainer.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // 12. EXPORTAÇÃO PDF
+        // ==========================================
+        function exportPDF() {
+            if (clients.length === 0) {
+                alert('Não existem clientes para exportar.');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+
+            doc.setFontSize(16);
+            doc.setTextColor(30, 41, 59);
+            doc.text('Relatório de Clientes TV - Base de Dados Supabase', 14, 18);
+
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT')}`, 14, 24);
+
+            const statusLabel = (dateStr) => {
+                const st = getStatus(dateStr);
+                if (st === 'active') return 'Regular';
+                if (st === 'warning') return 'A Vencer';
+                return 'Em Atraso';
+            };
+
+            const body = clients.map(c => [
+                c.name || '-',
+                c.phone || '-',
+                c.service || '-',
+                [c.marca_equipamento, c.box].filter(Boolean).join(' - ') || '-',
+                c.user || '-',
+                `${Number(c.price || 0).toFixed(2)} €`,
+                c.date || '-',
+                statusLabel(c.date),
+                c.observacao || '-'
+            ]);
+
+            doc.autoTable({
+                startY: 30,
+                head: [['Cliente', 'Contacto', 'Serviço TV', 'Marca / Box', 'Utilizador', 'Valor', 'Vencimento', 'Estado', 'Notas']],
+                body: body,
+                theme: 'striped',
+                styles: { fontSize: 8, cellPadding: 3 },
+                headStyles: { fillColor: [37, 99, 235] }
+            });
+
+            doc.save(`relatorio_clientes_tv_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        // ==========================================
+        // 13. CONFIGURAÇÃO SUPABASE
+        // ==========================================
+        function openConfigModal() {
+            document.getElementById('cfg-supabase-url').value = localStorage.getItem(SUPABASE_STORAGE_URL) || '';
+            document.getElementById('cfg-supabase-key').value = localStorage.getItem(SUPABASE_STORAGE_KEY) || '';
+            const box = document.getElementById('cfg-status-box');
+            box.className = 'hidden text-xs p-3 rounded-xl border';
+            box.innerHTML = '';
+
+            const modal = document.getElementById('config-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfigModal() {
+            const modal = document.getElementById('config-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function testSupabaseConnection() {
+            const url = document.getElementById('cfg-supabase-url').value.trim();
+            const key = document.getElementById('cfg-supabase-key').value.trim();
+            const box = document.getElementById('cfg-status-box');
+
+            if (!url || !key) {
+                box.className = 'text-xs p-3 rounded-xl border bg-amber-500/10 text-amber-300 border-amber-500/30';
+                box.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Preencha o URL e a Chave Anon.';
+                return;
             }
 
-            // ==========================================
-            // 12. EXPORTAÇÃO PDF
-            // ==========================================
-            function exportPDF() {
-                if (clients.length === 0) {
-                    alert('Não existem clientes para exportar.');
-                    return;
-                }
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF({ orientation: 'landscape' });
+            box.className = 'text-xs p-3 rounded-xl border bg-blue-500/10 text-blue-300 border-blue-500/30';
+            box.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> A testar ligação ao Supabase...';
 
-                doc.setFontSize(16);
-                doc.setTextColor(30, 41, 59);
-                doc.text('Relatório de Clientes TV - Base de Dados Supabase', 14, 18);
+            try {
+                const client = window.supabase.createClient(url, key);
+                const { error } = await client.from('clientes').select('id').limit(1);
+                if (error) throw error;
 
-                doc.setFontSize(9);
-                doc.setTextColor(100, 116, 139);
-                doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT')}`, 14, 24);
+                box.className = 'text-xs p-3 rounded-xl border bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
+                box.innerHTML = '<i class="fa-solid fa-circle-check mr-1.5"></i> <b>Ligação bem-sucedida!</b> Tabela "clientes" encontrada.';
+            } catch (err) {
+                box.className = 'text-xs p-3 rounded-xl border bg-red-500/10 text-red-300 border-red-500/30';
+                box.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1.5"></i> <b>Erro:</b> ${escapeHTML(err.message || 'Falha de conexão')}. Certifique-se de executar o schema.sql.`;
+            }
+        }
 
-                const statusLabel = (dateStr) => {
-                    const st = getStatus(dateStr);
-                    if (st === 'active') return 'Regular';
-                    if (st === 'warning') return 'A Vencer';
-                    return 'Em Atraso';
-                };
+        async function saveSupabaseConfig() {
+            const url = document.getElementById('cfg-supabase-url').value.trim();
+            const key = document.getElementById('cfg-supabase-key').value.trim();
 
-                const body = clients.map(c => [
-                    c.name || '-',
-                    c.phone || '-',
-                    c.service || '-',
-                    [c.marca_equipamento, c.box].filter(Boolean).join(' - ') || '-',
-                    c.user || '-',
-                    `${Number(c.price || 0).toFixed(2)} €`,
-                    c.date || '-',
-                    statusLabel(c.date),
-                    c.observacao || '-'
-                ]);
-
-                doc.autoTable({
-                    startY: 30,
-                    head: [['Cliente', 'Contacto', 'Serviço TV', 'Marca / Box', 'Utilizador', 'Valor', 'Vencimento', 'Estado', 'Notas']],
-                    body: body,
-                    theme: 'striped',
-                    styles: { fontSize: 8, cellPadding: 3 },
-                    headStyles: { fillColor: [37, 99, 235] }
-                });
-
-                doc.save(`relatorio_clientes_tv_${new Date().toISOString().split('T')[0]}.pdf`);
+            if (!url || !key) {
+                alert('Preencha o Project URL e a Anon Public Key.');
+                return;
             }
 
-            // ==========================================
-            // 13. CONFIGURAÇÃO SUPABASE
-            // ==========================================
-            function openConfigModal() {
-                document.getElementById('cfg-supabase-url').value = localStorage.getItem(SUPABASE_STORAGE_URL) || '';
-                document.getElementById('cfg-supabase-key').value = localStorage.getItem(SUPABASE_STORAGE_KEY) || '';
-                const box = document.getElementById('cfg-status-box');
-                box.className = 'hidden text-xs p-3 rounded-xl border';
-                box.innerHTML = '';
+            localStorage.setItem(SUPABASE_STORAGE_URL, url);
+            localStorage.setItem(SUPABASE_STORAGE_KEY, key);
 
-                const modal = document.getElementById('config-modal');
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
-
-            function closeConfigModal() {
-                const modal = document.getElementById('config-modal');
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-
-            async function testSupabaseConnection() {
-                const url = document.getElementById('cfg-supabase-url').value.trim();
-                const key = document.getElementById('cfg-supabase-key').value.trim();
-                const box = document.getElementById('cfg-status-box');
-
-                if (!url || !key) {
-                    box.className = 'text-xs p-3 rounded-xl border bg-amber-500/10 text-amber-300 border-amber-500/30';
-                    box.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Preencha o URL e a Chave Anon.';
-                    return;
-                }
-
-                box.className = 'text-xs p-3 rounded-xl border bg-blue-500/10 text-blue-300 border-blue-500/30';
-                box.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> A testar ligação ao Supabase...';
-
-                try {
-                    const client = window.supabase.createClient(url, key);
-                    const { error } = await client.from('clientes').select('id').limit(1);
-                    if (error) throw error;
-
-                    box.className = 'text-xs p-3 rounded-xl border bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
-                    box.innerHTML = '<i class="fa-solid fa-circle-check mr-1.5"></i> <b>Ligação bem-sucedida!</b> Tabela "clientes" encontrada.';
-                } catch (err) {
-                    box.className = 'text-xs p-3 rounded-xl border bg-red-500/10 text-red-300 border-red-500/30';
-                    box.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1.5"></i> <b>Erro:</b> ${escapeHTML(err.message || 'Falha de conexão')}. Certifique-se de executar o schema.sql.`;
-                }
-            }
-
-            async function saveSupabaseConfig() {
-                const url = document.getElementById('cfg-supabase-url').value.trim();
-                const key = document.getElementById('cfg-supabase-key').value.trim();
-
-                if (!url || !key) {
-                    alert('Preencha o Project URL e a Anon Public Key.');
-                    return;
-                }
-
-                localStorage.setItem(SUPABASE_STORAGE_URL, url);
-                localStorage.setItem(SUPABASE_STORAGE_KEY, key);
-
-                closeConfigModal();
-                await initializeSupabase();
-                alert('Configuração do Supabase guardada!');
-            }
+            closeConfigModal();
+            await initializeSupabase();
+            alert('Configuração do Supabase guardada!');
+        }
     </script>
 </body>
 
