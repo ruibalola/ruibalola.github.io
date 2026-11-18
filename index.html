@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -17,7 +16,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
-
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col antialiased">
 
     <!-- ============================================================================== -->
@@ -25,17 +23,16 @@
     <!-- ============================================================================== -->
     <div id="login-view" class="min-h-screen flex items-center justify-center p-4 bg-slate-950">
         <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-
+            
             <div class="text-center space-y-2">
-                <div
-                    class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-500/25 mb-2">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-500/25 mb-2">
                     <i class="fa-solid fa-tv text-2xl"></i>
                 </div>
                 <h1 class="text-2xl font-bold text-white tracking-wide">Gestão de Clientes TV</h1>
                 <p class="text-xs text-slate-400">Acesso Restrito ao Painel de Administração</p>
             </div>
 
-            <!-- Aviso das credenciais iniciais para o primeiro acesso 
+            <!-- Aviso das credenciais iniciais para o primeiro acesso -->
             <div id="login-initial-hint" class="bg-blue-950/40 border border-blue-500/30 rounded-xl p-3 text-xs text-blue-200 flex items-start gap-2.5">
                 <i class="fa-solid fa-circle-info text-blue-400 mt-0.5"></i>
                 <div>
@@ -43,30 +40,24 @@
                     <p>Utilizador: <b class="font-mono text-amber-300">admin</b> | Senha: <b class="font-mono text-amber-300">admin123</b></p>
                     <p class="text-[11px] text-slate-400 mt-0.5">Poderá alterar a senha e gerir utilizadores após entrar.</p>
                 </div>
-            </div>-->
+            </div>
 
             <!-- Formulário de Login -->
             <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Utilizador *</label>
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i
-                                class="fa-solid fa-user"></i></span>
-                        <input type="text" id="login-username" required placeholder="admin" autocomplete="username"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" id="login-username" required placeholder="admin" autocomplete="username" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Palavra-passe *</label>
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i
-                                class="fa-solid fa-lock"></i></span>
-                        <input type="password" id="login-password" required placeholder="••••••••"
-                            autocomplete="current-password"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-10 text-sm text-white focus:outline-none focus:border-blue-500 transition">
-                        <button type="button" onclick="toggleLoginPassword()"
-                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-10 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+                        <button type="button" onclick="toggleLoginPassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white">
                             <i id="eye-login-pass" class="fa-solid fa-eye"></i>
                         </button>
                     </div>
@@ -75,15 +66,13 @@
                 <!-- Mensagem de Erro/Alerta -->
                 <div id="login-alert" class="hidden text-xs p-3 rounded-xl border"></div>
 
-                <button type="submit" id="btn-login-submit"
-                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-xl text-sm transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2">
+                <button type="submit" id="btn-login-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-xl text-sm transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-right-to-bracket"></i> <span>Entrar no Sistema</span>
                 </button>
             </form>
 
             <div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-                <span id="login-conn-indicator" class="flex items-center gap-1.5"><i
-                        class="fa-solid fa-cloud text-emerald-400"></i> Supabase Conectado</span>
+                <span id="login-conn-indicator" class="flex items-center gap-1.5"><i class="fa-solid fa-cloud text-emerald-400"></i> Supabase Conectado</span>
                 <button onclick="openConfigModal()" class="text-blue-400 hover:underline">Configurar Ligação</button>
             </div>
         </div>
@@ -97,7 +86,7 @@
         <!-- CABEÇALHO SUPERIOR -->
         <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 px-4 sm:px-6 py-3">
             <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
-
+                
                 <!-- Logo & Estado Cloud -->
                 <div class="flex items-center space-x-3">
                     <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/30">
@@ -114,56 +103,40 @@
 
                 <!-- Botões de Ação & Perfil -->
                 <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto justify-end">
-
+                    
                     <!-- Novo Cliente -->
-                    <button onclick="openModal()"
-                        class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm transition flex items-center gap-1.5 shadow-lg shadow-blue-500/20">
+                    <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm transition flex items-center gap-1.5 shadow-lg shadow-blue-500/20">
                         <i class="fa-solid fa-plus"></i> <span>Novo Cliente</span>
                     </button>
 
                     <!-- Gestão de Utilizadores (Apenas Root / Admin) -->
-                    <button id="btn-user-mgmt" onclick="openUserMgmtModal()"
-                        class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 shadow-lg shadow-purple-600/20"
-                        title="Gerir Utilizadores do Sistema (Root)">
+                    <button id="btn-user-mgmt" onclick="openUserMgmtModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 shadow-lg shadow-purple-600/20" title="Gerir Utilizadores do Sistema (Root)">
                         <i class="fa-solid fa-users-gear"></i> <span>Utilizadores</span>
                     </button>
 
                     <!-- Upload CSV para o Supabase -->
-                    <label
-                        class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 cursor-pointer border border-slate-700"
-                        title="Upload de ficheiro CSV para a base de dados Supabase">
-                        <i class="fa-solid fa-file-arrow-up text-amber-400"></i> <span class="hidden sm:inline">Upload
-                            CSV</span>
+                    <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 cursor-pointer border border-slate-700" title="Upload de ficheiro CSV para a base de dados Supabase">
+                        <i class="fa-solid fa-file-arrow-up text-amber-400"></i> <span class="hidden sm:inline">Upload CSV</span>
                         <input type="file" accept=".csv,text/csv" onchange="uploadCSVToSupabase(event)" class="hidden">
                     </label>
 
                     <!-- Guardar Cópia CSV -->
-                    <button onclick="downloadCSVReport()"
-                        class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700"
-                        title="Exportar CSV da base de dados">
-                        <i class="fa-solid fa-download text-blue-400"></i> <span class="hidden sm:inline">Guardar
-                            CSV</span>
+                    <button onclick="downloadCSVReport()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700" title="Exportar CSV da base de dados">
+                        <i class="fa-solid fa-download text-blue-400"></i> <span class="hidden sm:inline">Guardar CSV</span>
                     </button>
 
                     <!-- PDF -->
-                    <button onclick="exportPDF()"
-                        class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700"
-                        title="Relatório PDF">
+                    <button onclick="exportPDF()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700" title="Relatório PDF">
                         <i class="fa-solid fa-file-pdf text-red-400"></i> <span class="hidden md:inline">PDF</span>
                     </button>
 
                     <!-- Minha Senha -->
-                    <button onclick="openChangeMyPasswordModal()"
-                        class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700"
-                        title="Alterar a Minha Senha">
-                        <i class="fa-solid fa-key text-yellow-400"></i> <span class="hidden lg:inline">Minha
-                            Senha</span>
+                    <button onclick="openChangeMyPasswordModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700" title="Alterar a Minha Senha">
+                        <i class="fa-solid fa-key text-yellow-400"></i> <span class="hidden lg:inline">Minha Senha</span>
                     </button>
 
                     <!-- Sair -->
-                    <button onclick="handleLogout()"
-                        class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-red-500/30"
-                        title="Terminar Sessão">
+                    <button onclick="handleLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-red-500/30" title="Terminar Sessão">
                         <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>
                     </button>
                 </div>
@@ -174,14 +147,11 @@
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-5">
 
             <!-- Identificação do Utilizador Ativo -->
-            <div
-                class="flex items-center justify-between text-xs text-slate-400 bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-800">
+            <div class="flex items-center justify-between text-xs text-slate-400 bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-800">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span>Sessão iniciada como: <b id="logged-user-display"
-                            class="text-white font-mono">admin</b></span>
-                    <span id="logged-user-role-badge"
-                        class="px-2 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase font-semibold">ROOT</span>
+                    <span>Sessão iniciada como: <b id="logged-user-display" class="text-white font-mono">admin</b></span>
+                    <span id="logged-user-role-badge" class="px-2 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase font-semibold">ROOT</span>
                 </div>
                 <div id="results-count" class="text-slate-400">0 clientes no Supabase</div>
             </div>
@@ -189,32 +159,28 @@
             <!-- Cartões de Resumo -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3.5 shadow-lg">
-                    <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl text-lg sm:text-xl"><i
-                            class="fa-solid fa-users"></i></div>
+                    <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl text-lg sm:text-xl"><i class="fa-solid fa-users"></i></div>
                     <div>
                         <p class="text-[11px] font-semibold text-slate-400 uppercase">Total</p>
                         <h3 id="stat-total" class="text-xl sm:text-2xl font-bold text-white">0</h3>
                     </div>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3.5 shadow-lg">
-                    <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl text-lg sm:text-xl"><i
-                            class="fa-solid fa-circle-check"></i></div>
+                    <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl text-lg sm:text-xl"><i class="fa-solid fa-circle-check"></i></div>
                     <div>
                         <p class="text-[11px] font-semibold text-slate-400 uppercase">Regulares</p>
                         <h3 id="stat-active" class="text-xl sm:text-2xl font-bold text-white">0</h3>
                     </div>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3.5 shadow-lg">
-                    <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl text-lg sm:text-xl"><i
-                            class="fa-solid fa-clock"></i></div>
+                    <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl text-lg sm:text-xl"><i class="fa-solid fa-clock"></i></div>
                     <div>
                         <p class="text-[11px] font-semibold text-slate-400 uppercase">A Vencer (7d)</p>
                         <h3 id="stat-warning" class="text-xl sm:text-2xl font-bold text-white">0</h3>
                     </div>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3.5 shadow-lg">
-                    <div class="p-3 bg-red-500/10 text-red-400 rounded-xl text-lg sm:text-xl"><i
-                            class="fa-solid fa-circle-exclamation"></i></div>
+                    <div class="p-3 bg-red-500/10 text-red-400 rounded-xl text-lg sm:text-xl"><i class="fa-solid fa-circle-exclamation"></i></div>
                     <div>
                         <p class="text-[11px] font-semibold text-slate-400 uppercase">Em Atraso</p>
                         <h3 id="stat-overdue" class="text-xl sm:text-2xl font-bold text-white">0</h3>
@@ -223,18 +189,13 @@
             </div>
 
             <!-- Pesquisa e Filtros -->
-            <div
-                class="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between shadow-lg">
+            <div class="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between shadow-lg">
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
                     <div class="relative flex-1">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i
-                                class="fa-solid fa-search"></i></span>
-                        <input type="text" id="search-input" oninput="renderUI()"
-                            placeholder="Pesquisar cliente, contacto, user, serviço ou link..."
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i class="fa-solid fa-search"></i></span>
+                        <input type="text" id="search-input" oninput="renderUI()" placeholder="Pesquisar cliente, contacto, user, serviço ou link..." class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500">
                     </div>
-                    <select id="filter-status" onchange="renderUI()"
-                        class="bg-slate-950 border border-slate-800 rounded-xl py-2 px-3.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <select id="filter-status" onchange="renderUI()" class="bg-slate-950 border border-slate-800 rounded-xl py-2 px-3.5 text-sm text-white focus:outline-none focus:border-blue-500">
                         <option value="all">Todos os Estados</option>
                         <option value="active">Regulares</option>
                         <option value="warning">A Vencer (Próx. 7 dias)</option>
@@ -248,8 +209,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr
-                                class="bg-slate-950/80 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                            <tr class="bg-slate-950/80 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                                 <th class="p-4">Cliente / Contacto</th>
                                 <th class="p-4">Serviço TV</th>
                                 <th class="p-4">Acessos (User / Senha)</th>
@@ -276,24 +236,20 @@
     <!-- ============================================================================== -->
 
     <!-- MODAL 1: GESTÃO DE UTILIZADORES DO SISTEMA (ROOT) -->
-    <div id="user-mgmt-modal"
-        class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div id="user-mgmt-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
             <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-users-gear text-purple-400 text-lg"></i>
                     <h3 class="font-bold text-base sm:text-lg text-white">Gestão de Utilizadores do Sistema</h3>
                 </div>
-                <button onclick="closeUserMgmtModal()" class="text-slate-400 hover:text-white transition p-1"><i
-                        class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeUserMgmtModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-5 sm:p-6 space-y-4">
-
+                
                 <div class="flex justify-between items-center">
-                    <p class="text-xs text-slate-400">Apenas o administrador <b class="text-white">root</b> pode criar e
-                        gerir utilizadores com acesso ao painel.</p>
-                    <button onclick="openNewUserModal()"
-                        class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow">
+                    <p class="text-xs text-slate-400">Apenas o administrador <b class="text-white">root</b> pode criar e gerir utilizadores com acesso ao painel.</p>
+                    <button onclick="openNewUserModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow">
                         <i class="fa-solid fa-user-plus"></i> Novo Utilizador
                     </button>
                 </div>
@@ -302,8 +258,7 @@
                 <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
                     <table class="w-full text-left border-collapse text-xs">
                         <thead>
-                            <tr
-                                class="bg-slate-900 border-b border-slate-800 text-[10px] font-semibold text-slate-400 uppercase">
+                            <tr class="bg-slate-900 border-b border-slate-800 text-[10px] font-semibold text-slate-400 uppercase">
                                 <th class="p-3">Utilizador</th>
                                 <th class="p-3">Nome</th>
                                 <th class="p-3">Cargo</th>
@@ -315,293 +270,217 @@
                 </div>
 
                 <div class="pt-3 flex justify-end border-t border-slate-800">
-                    <button type="button" onclick="closeUserMgmtModal()"
-                        class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Fechar</button>
+                    <button type="button" onclick="closeUserMgmtModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Fechar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- MODAL 2: CRIAR / EDITAR UTILIZADOR DO SISTEMA -->
-    <div id="new-user-modal"
-        class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div id="new-user-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl my-8">
             <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
                 <h3 id="new-user-modal-title" class="font-bold text-base text-white">Criar Novo Utilizador</h3>
-                <button onclick="closeNewUserModal()" class="text-slate-400 hover:text-white transition p-1"><i
-                        class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeNewUserModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="handleSaveSystemUser(event)" class="p-5 sm:p-6 space-y-4">
                 <input type="hidden" id="edit-user-id">
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nome Completo *</label>
-                    <input type="text" id="sys-user-name" required placeholder="Ex: Rui Lopes"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <input type="text" id="sys-user-name" required placeholder="Ex: Rui Lopes" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nome de Utilizador (Login)
-                        *</label>
-                    <input type="text" id="sys-user-username" required placeholder="Ex: rui.lopes"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-mono">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nome de Utilizador (Login) *</label>
+                    <input type="text" id="sys-user-username" required placeholder="Ex: rui.lopes" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-mono">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Cargo / Permissão *</label>
-                    <select id="sys-user-role"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <select id="sys-user-role" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
                         <option value="admin">Administrador</option>
                         <option value="root">Super Administrador (Root)</option>
                     </select>
                 </div>
                 <div>
                     <div class="flex justify-between items-center mb-1">
-                        <label id="sys-user-pwd-label"
-                            class="text-xs font-semibold text-slate-400 uppercase">Palavra-passe *</label>
-                        <button type="button" onclick="generateSysUserPassword()"
-                            class="text-xs text-blue-400 hover:underline">Gerar</button>
+                        <label id="sys-user-pwd-label" class="text-xs font-semibold text-slate-400 uppercase">Palavra-passe *</label>
+                        <button type="button" onclick="generateSysUserPassword()" class="text-xs text-blue-400 hover:underline">Gerar</button>
                     </div>
-                    <input type="text" id="sys-user-pwd"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm font-mono text-white focus:outline-none focus:border-blue-500"
-                        placeholder="Mínimo 6 caracteres">
-                    <p id="sys-user-pwd-hint" class="text-[11px] text-slate-500 mt-1 hidden">Deixe em branco se não
-                        pretender alterar a senha.</p>
+                    <input type="text" id="sys-user-pwd" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm font-mono text-white focus:outline-none focus:border-blue-500" placeholder="Mínimo 6 caracteres">
+                    <p id="sys-user-pwd-hint" class="text-[11px] text-slate-500 mt-1 hidden">Deixe em branco se não pretender alterar a senha.</p>
                 </div>
                 <div class="pt-3 flex justify-end gap-3 border-t border-slate-800">
-                    <button type="button" onclick="closeNewUserModal()"
-                        class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
-                    <button type="submit"
-                        class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-purple-600/20">Guardar
-                        Utilizador</button>
+                    <button type="button" onclick="closeNewUserModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-purple-600/20">Guardar Utilizador</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- MODAL 3: ALTERAR A MINHA SENHA -->
-    <div id="change-my-pwd-modal"
-        class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div id="change-my-pwd-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl my-8">
             <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-key text-yellow-400"></i>
                     <h3 class="font-bold text-base text-white">Alterar a Minha Senha</h3>
                 </div>
-                <button onclick="closeChangeMyPasswordModal()" class="text-slate-400 hover:text-white transition p-1"><i
-                        class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeChangeMyPasswordModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="handleSaveMyPassword(event)" class="p-5 sm:p-6 space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Palavra-passe Atual
-                        *</label>
-                    <input type="password" id="my-pwd-old" required placeholder="••••••••"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Palavra-passe Atual *</label>
+                    <input type="password" id="my-pwd-old" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nova Palavra-passe
-                        *</label>
-                    <input type="password" id="my-pwd-new" required minlength="6" placeholder="Mínimo 6 caracteres"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nova Palavra-passe *</label>
+                    <input type="password" id="my-pwd-new" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Confirmar Nova
-                        Palavra-passe *</label>
-                    <input type="password" id="my-pwd-confirm" required minlength="6"
-                        placeholder="Repita a nova palavra-passe"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Confirmar Nova Palavra-passe *</label>
+                    <input type="password" id="my-pwd-confirm" required minlength="6" placeholder="Repita a nova palavra-passe" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div class="pt-3 flex justify-end gap-3 border-t border-slate-800">
-                    <button type="button" onclick="closeChangeMyPasswordModal()"
-                        class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
-                    <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20">Atualizar
-                        Senha</button>
+                    <button type="button" onclick="closeChangeMyPasswordModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20">Atualizar Senha</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- MODAL 4: CRIAR / EDITAR CLIENTE DE TV -->
-    <div id="client-modal"
-        class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div id="client-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
             <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
                 <h3 id="modal-title" class="font-bold text-base sm:text-lg text-white">Novo Cliente de Serviço TV</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1"><i
-                        class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form id="client-form" onsubmit="saveClient(event)" class="p-5 sm:p-6 space-y-4">
                 <input type="hidden" id="client-id">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nome do Cliente
-                            *</label>
-                        <input type="text" id="c-name" required
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                            placeholder="Ex: João Silva">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nome do Cliente *</label>
+                        <input type="text" id="c-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: João Silva">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Contacto /
-                            WhatsApp</label>
-                        <input type="text" id="c-phone"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                            placeholder="Ex: +351 912345678">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Contacto / WhatsApp</label>
+                        <input type="text" id="c-phone" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: +351 912345678">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Tipo de Serviço TV
-                            *</label>
-                        <input type="text" id="c-service" required
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                            placeholder="Ex: IPTV Premium">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Tipo de Serviço TV *</label>
+                        <input type="text" id="c-service" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: IPTV Premium">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Valor (€) *</label>
-                        <input type="number" step="0.01" min="0" id="c-price" required
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                            placeholder="Ex: 10.00">
+                        <input type="number" step="0.01" min="0" id="c-price" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: 10.00">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Utilizador
-                            (User)</label>
-                        <input type="text" id="c-user" autocomplete="off"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                            placeholder="Ex: cliente123">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Utilizador (User)</label>
+                        <input type="text" id="c-user" autocomplete="off" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: cliente123">
                     </div>
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label class="text-xs font-semibold text-slate-400 uppercase">Palavra-passe (Pass)</label>
-                            <button type="button" onclick="generatePasswordForForm()"
-                                class="text-[10px] text-blue-400 hover:underline">Gerar</button>
+                            <button type="button" onclick="generatePasswordForForm()" class="text-[10px] text-blue-400 hover:underline">Gerar</button>
                         </div>
                         <div class="relative">
-                            <input type="password" id="c-pass" autocomplete="new-password"
-                                class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 pr-10 text-sm text-white focus:outline-none focus:border-blue-500"
-                                placeholder="Ex: senha123">
-                            <button type="button" onclick="toggleFormPassword()"
-                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white">
+                            <input type="password" id="c-pass" autocomplete="new-password" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 pr-10 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: senha123">
+                            <button type="button" onclick="toggleFormPassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white">
                                 <i id="eye-modal-pass" class="fa-solid fa-eye"></i>
                             </button>
                         </div>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Link (URL / Painel /
-                        M3U)</label>
-                    <input type="text" id="c-link"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                        placeholder="Ex: http://servidor.com/get.php?...">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Link (URL / Painel / M3U)</label>
+                    <input type="text" id="c-link" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: http://servidor.com/get.php?...">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Data Próximo Pagamento
-                        *</label>
-                    <input type="date" id="c-date" required
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Data Próximo Pagamento *</label>
+                    <input type="date" id="c-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div class="pt-3 flex justify-end gap-3 border-t border-slate-800">
-                    <button type="button" onclick="closeModal()"
-                        class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl text-sm transition">Cancelar</button>
-                    <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-lg shadow-blue-500/20">Guardar
-                        no Supabase</button>
+                    <button type="button" onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl text-sm transition">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-lg shadow-blue-500/20">Guardar no Supabase</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- MODAL 5: ALTERAR SENHA DO CLIENTE (RÁPIDO) -->
-    <div id="client-password-modal"
-        class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div id="client-password-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl my-8">
             <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-key text-yellow-400"></i>
                     <h3 class="font-bold text-base sm:text-lg text-white">Alterar Senha do Cliente</h3>
                 </div>
-                <button onclick="closeClientPasswordModal()" class="text-slate-400 hover:text-white transition p-1"><i
-                        class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeClientPasswordModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="saveClientPassword(event)" class="p-5 sm:p-6 space-y-4">
                 <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs space-y-1">
                     <p class="text-slate-400">Cliente: <b id="pwd-modal-client-name" class="text-white text-sm"></b></p>
-                    <p class="text-slate-400">Utilizador: <span id="pwd-modal-client-user"
-                            class="font-mono text-blue-400"></span></p>
+                    <p class="text-slate-400">Utilizador: <span id="pwd-modal-client-user" class="font-mono text-blue-400"></span></p>
                 </div>
 
                 <div>
                     <div class="flex justify-between items-center mb-1">
                         <label class="text-xs font-semibold text-slate-400 uppercase">Nova Palavra-passe *</label>
-                        <button type="button" onclick="generatePasswordForQuickModal()"
-                            class="text-xs text-blue-400 hover:underline flex items-center gap-1">
+                        <button type="button" onclick="generatePasswordForQuickModal()" class="text-xs text-blue-400 hover:underline flex items-center gap-1">
                             <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Segura
                         </button>
                     </div>
                     <div class="relative">
-                        <input type="text" id="pwd-modal-input" required
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 pr-10 text-sm font-mono text-white focus:outline-none focus:border-blue-500">
-                        <button type="button" onclick="copyModalPassword()"
-                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white"
-                            title="Copiar Senha">
+                        <input type="text" id="pwd-modal-input" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 pr-10 text-sm font-mono text-white focus:outline-none focus:border-blue-500">
+                        <button type="button" onclick="copyModalPassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white" title="Copiar Senha">
                             <i class="fa-solid fa-copy"></i>
                         </button>
                     </div>
                 </div>
 
                 <div class="pt-3 flex justify-end gap-3 border-t border-slate-800">
-                    <button type="button" onclick="closeClientPasswordModal()"
-                        class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl text-sm transition">Cancelar</button>
-                    <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-lg shadow-blue-500/20">Atualizar
-                        Senha</button>
+                    <button type="button" onclick="closeClientPasswordModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl text-sm transition">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-lg shadow-blue-500/20">Atualizar Senha</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- MODAL 6: CONFIGURAÇÃO SUPABASE -->
-    <div id="config-modal"
-        class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div id="config-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
             <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-cloud text-emerald-400"></i>
                     <h3 class="font-bold text-base sm:text-lg text-white">Configuração Supabase Cloud</h3>
                 </div>
-                <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white transition p-1"><i
-                        class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-5 sm:p-6 space-y-4">
-                <p class="text-xs text-slate-400">Pode colocar estes valores diretamente no ficheiro <b>config.js</b>
-                    para o GitHub Pages ficar automaticamente conectado!</p>
+                <p class="text-xs text-slate-400">Pode colocar estes valores diretamente no ficheiro <b>config.js</b> para o GitHub Pages ficar automaticamente conectado!</p>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Project URL *</label>
-                    <input type="url" id="cfg-supabase-url"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white font-mono focus:outline-none focus:border-blue-500"
-                        placeholder="https://xxxxxxxx.supabase.co">
+                    <input type="url" id="cfg-supabase-url" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white font-mono focus:outline-none focus:border-blue-500" placeholder="https://xxxxxxxx.supabase.co">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Anon Public Key *</label>
-                    <input type="password" id="cfg-supabase-key"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white font-mono focus:outline-none focus:border-blue-500"
-                        placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                    <input type="password" id="cfg-supabase-key" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white font-mono focus:outline-none focus:border-blue-500" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
                 </div>
 
                 <div id="cfg-status-box" class="hidden text-xs p-3 rounded-xl border"></div>
 
                 <div class="pt-2 flex justify-between items-center border-t border-slate-800">
-                    <button type="button" onclick="testSupabaseConnection()"
-                        class="bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 px-3.5 rounded-xl font-medium text-xs transition flex items-center gap-1.5 border border-slate-700">
+                    <button type="button" onclick="testSupabaseConnection()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 px-3.5 rounded-xl font-medium text-xs transition flex items-center gap-1.5 border border-slate-700">
                         <i class="fa-solid fa-bolt text-amber-400"></i> Testar Ligação
                     </button>
                     <div class="flex gap-2">
-                        <button type="button" onclick="closeConfigModal()"
-                            class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
-                        <button type="button" onclick="saveSupabaseConfig()"
-                            class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20">Guardar
-                            & Conectar</button>
+                        <button type="button" onclick="closeConfigModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
+                        <button type="button" onclick="saveSupabaseConfig()" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20">Guardar & Conectar</button>
                     </div>
                 </div>
             </div>
@@ -639,7 +518,7 @@
 
             try {
                 supabaseClient = window.supabase.createClient(config.url, config.key);
-
+                
                 // Verifica se já existia uma sessão guardada no navegador
                 const savedSession = sessionStorage.getItem(SESSION_USER_KEY) || localStorage.getItem(SESSION_USER_KEY);
                 if (savedSession) {
@@ -1059,7 +938,17 @@
 
         async function saveClient(e) {
             e.preventDefault();
-            if (!supabaseClient) return;
+            if (!supabaseClient) {
+                alert('Supabase não conectado.');
+                return;
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Guardar no Supabase';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> A guardar...';
+            }
 
             const existingId = document.getElementById('client-id').value.trim();
             const clientData = {
@@ -1074,24 +963,55 @@
             };
 
             try {
+                let savedClient = null;
+
                 if (existingId) {
-                    const { error } = await supabaseClient
+                    const { data, error } = await supabaseClient
                         .from('clientes')
                         .update(clientData)
-                        .eq('id', existingId);
+                        .eq('id', existingId)
+                        .select();
                     if (error) throw error;
+                    if (data && data.length > 0) savedClient = data[0];
                 } else {
-                    const { error } = await supabaseClient
+                    const { data, error } = await supabaseClient
                         .from('clientes')
-                        .insert([clientData]);
+                        .insert([clientData])
+                        .select();
                     if (error) throw error;
+                    if (data && data.length > 0) savedClient = data[0];
                 }
 
                 closeModal();
+
+                // Limpa filtros de pesquisa para o novo cliente ficar imediatamente visível
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) searchInput.value = '';
+                const filterStatus = document.getElementById('filter-status');
+                if (filterStatus) filterStatus.value = 'all';
+
+                // Atualização instantânea em memória (0ms de atraso)
+                if (savedClient) {
+                    if (existingId) {
+                        const idx = clients.findIndex(x => String(x.id) === String(existingId));
+                        if (idx !== -1) clients[idx] = savedClient;
+                        else clients.unshift(savedClient);
+                    } else {
+                        clients.unshift(savedClient);
+                    }
+                    renderUI();
+                }
+
+                // Sincronização em segundo plano com o Supabase
                 await fetchClientsFromSupabase();
             } catch (err) {
                 console.error('Erro ao guardar cliente:', err);
                 alert('Erro ao guardar no Supabase: ' + (err.message || err));
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
             }
         }
 
@@ -1103,16 +1023,23 @@
             }
 
             try {
+                // Remove imediatamente da interface (otimista)
+                clients = clients.filter(x => String(x.id) !== String(id));
+                renderUI();
+
                 const { error } = await supabaseClient
                     .from('clientes')
                     .delete()
                     .eq('id', id);
 
-                if (error) throw error;
-                await fetchClientsFromSupabase();
+                if (error) {
+                    await fetchClientsFromSupabase();
+                    throw error;
+                }
             } catch (err) {
                 console.error('Erro ao eliminar cliente:', err);
                 alert('Erro ao eliminar no Supabase: ' + (err.message || err));
+                await fetchClientsFromSupabase();
             }
         }
 
@@ -1175,9 +1102,15 @@
                     .eq('id', currentEditingClientId);
 
                 if (error) throw error;
+
+                // Atualização instantânea em memória
+                const target = clients.find(x => String(x.id) === String(currentEditingClientId));
+                if (target) target.pass = newPass;
+                renderUI();
+
                 closeClientPasswordModal();
-                await fetchClientsFromSupabase();
                 alert('Palavra-passe do cliente atualizada com sucesso no Supabase!');
+                await fetchClientsFromSupabase();
             } catch (err) {
                 alert('Erro ao atualizar palavra-passe: ' + (err.message || err));
             }
@@ -1228,6 +1161,11 @@
                         .select();
 
                     if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        clients = [...data, ...clients];
+                        renderUI();
+                    }
 
                     alert(`Sucesso! ${data.length} cliente(s) importado(s) para o Supabase.`);
                     await fetchClientsFromSupabase();
@@ -1697,5 +1635,4 @@
         }
     </script>
 </body>
-
 </html>

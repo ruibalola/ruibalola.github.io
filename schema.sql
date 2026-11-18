@@ -43,7 +43,7 @@ DROP POLICY IF EXISTS "Acesso total usuarios_sistema" ON public.usuarios_sistema
 CREATE POLICY "Acesso total usuarios_sistema"
     ON public.usuarios_sistema
     FOR ALL
-    TO anon, authenticated
+    TO anon, authenticated, service_role
     USING (true)
     WITH CHECK (true);
 
@@ -86,6 +86,25 @@ CREATE TRIGGER tr_clientes_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_updated_at();
 
+-- ==============================================================================
+-- PERMISSÕES DE ACESSO (GRANTS) & ROW LEVEL SECURITY (RLS)
+-- ==============================================================================
+-- 1. Permissões de uso do schema public
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+
+-- 2. Conceder permissões totais nas tabelas para as roles do Supabase
+GRANT ALL ON TABLE public.clientes TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.usuarios_sistema TO anon, authenticated, service_role;
+
+-- 3. Conceder permissões em sequências e funções
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated, service_role;
+
+-- 4. Garantir privilégios padrão para futuras tabelas/sequências
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon, authenticated, service_role;
+
 -- Habilitar RLS para clientes
 ALTER TABLE public.clientes ENABLE ROW LEVEL SECURITY;
 
@@ -93,7 +112,7 @@ DROP POLICY IF EXISTS "Acesso total clientes" ON public.clientes;
 CREATE POLICY "Acesso total clientes"
     ON public.clientes
     FOR ALL
-    TO anon, authenticated
+    TO anon, authenticated, service_role
     USING (true)
     WITH CHECK (true);
 

@@ -938,7 +938,17 @@
 
         async function saveClient(e) {
             e.preventDefault();
-            if (!supabaseClient) return;
+            if (!supabaseClient) {
+                alert('Supabase não conectado.');
+                return;
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Guardar no Supabase';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> A guardar...';
+            }
 
             const existingId = document.getElementById('client-id').value.trim();
             const clientData = {
@@ -953,24 +963,55 @@
             };
 
             try {
+                let savedClient = null;
+
                 if (existingId) {
-                    const { error } = await supabaseClient
+                    const { data, error } = await supabaseClient
                         .from('clientes')
                         .update(clientData)
-                        .eq('id', existingId);
+                        .eq('id', existingId)
+                        .select();
                     if (error) throw error;
+                    if (data && data.length > 0) savedClient = data[0];
                 } else {
-                    const { error } = await supabaseClient
+                    const { data, error } = await supabaseClient
                         .from('clientes')
-                        .insert([clientData]);
+                        .insert([clientData])
+                        .select();
                     if (error) throw error;
+                    if (data && data.length > 0) savedClient = data[0];
                 }
 
                 closeModal();
+
+                // Limpa filtros de pesquisa para o novo cliente ficar imediatamente visível
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) searchInput.value = '';
+                const filterStatus = document.getElementById('filter-status');
+                if (filterStatus) filterStatus.value = 'all';
+
+                // Atualização instantânea em memória (0ms de atraso)
+                if (savedClient) {
+                    if (existingId) {
+                        const idx = clients.findIndex(x => String(x.id) === String(existingId));
+                        if (idx !== -1) clients[idx] = savedClient;
+                        else clients.unshift(savedClient);
+                    } else {
+                        clients.unshift(savedClient);
+                    }
+                    renderUI();
+                }
+
+                // Sincronização em segundo plano com o Supabase
                 await fetchClientsFromSupabase();
             } catch (err) {
                 console.error('Erro ao guardar cliente:', err);
                 alert('Erro ao guardar no Supabase: ' + (err.message || err));
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
             }
         }
 
@@ -982,16 +1023,23 @@
             }
 
             try {
+                // Remove imediatamente da interface (otimista)
+                clients = clients.filter(x => String(x.id) !== String(id));
+                renderUI();
+
                 const { error } = await supabaseClient
                     .from('clientes')
                     .delete()
                     .eq('id', id);
 
-                if (error) throw error;
-                await fetchClientsFromSupabase();
+                if (error) {
+                    await fetchClientsFromSupabase();
+                    throw error;
+                }
             } catch (err) {
                 console.error('Erro ao eliminar cliente:', err);
                 alert('Erro ao eliminar no Supabase: ' + (err.message || err));
+                await fetchClientsFromSupabase();
             }
         }
 
@@ -1054,9 +1102,15 @@
                     .eq('id', currentEditingClientId);
 
                 if (error) throw error;
+
+                // Atualização instantânea em memória
+                const target = clients.find(x => String(x.id) === String(currentEditingClientId));
+                if (target) target.pass = newPass;
+                renderUI();
+
                 closeClientPasswordModal();
-                await fetchClientsFromSupabase();
                 alert('Palavra-passe do cliente atualizada com sucesso no Supabase!');
+                await fetchClientsFromSupabase();
             } catch (err) {
                 alert('Erro ao atualizar palavra-passe: ' + (err.message || err));
             }
@@ -1107,6 +1161,11 @@
                         .select();
 
                     if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        clients = [...data, ...clients];
+                        renderUI();
+                    }
 
                     alert(`Sucesso! ${data.length} cliente(s) importado(s) para o Supabase.`);
                     await fetchClientsFromSupabase();
