@@ -1,0 +1,45 @@
+# ==============================================================================
+# .gitignore - Gestão Clientes TV
+# ==============================================================================
+
+# Variáveis de ambiente e segredos locais (NUNCA enviar para o GitHub)
+.env
+.env.*
+!.env.example
+.env.txt
+
+# Nota: config.js pode ser enviado para o GitHub com a chave ANON pública
+# para que a aplicação no GitHub Pages já fique conectada automaticamente!
+# Se preferir mantê-lo privado, descomente a linha abaixo:
+# config.js
+
+# Ficheiros de dados locais e backups com dados confidenciais de clientes
+*.csv
+clientes(nao apagar).csv
+clientes*.csv
+*.pdf
+
+# Ficheiros do Sistema Operativo e temporários
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+.DS_Store
+.Spotlight-V100
+.Trashes
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

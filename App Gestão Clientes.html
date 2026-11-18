@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gestão TV - Painel de Controlo</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS Client v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Ficheiro de Configuração Automática Supabase -->
+    <script src="config.js" onerror="console.info('config.js não detetado.')"></script>
+    <!-- jsPDF & AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col antialiased">
+
+    <!-- ============================================================================== -->
+    <!-- 1. ECRÃ DE LOGIN (ACESSO RESTRITO - SEM CRIAÇÃO PÚBLICA) -->
+    <!-- ============================================================================== -->
+    <div id="login-view" class="min-h-screen flex items-center justify-center p-4 bg-slate-950">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+            
+            <div class="text-center space-y-2">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-500/25 mb-2">
+                    <i class="fa-solid fa-tv text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white tracking-wide">Gestão de Clientes TV</h1>
+                <p class="text-xs text-slate-400">Acesso Restrito ao Painel de Administração</p>
+            </div>
+
+            <!-- Aviso das credenciais iniciais para o primeiro acesso -->
+            <div id="login-initial-hint" class="bg-blue-950/40 border border-blue-500/30 rounded-xl p-3 text-xs text-blue-200 flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-info text-blue-400 mt-0.5"></i>
+                <div>
+                    <p class="font-semibold text-white">Acesso Inicial Root:</p>
+                    <p>Utilizador: <b class="font-mono text-amber-300">admin</b> | Senha: <b class="font-mono text-amber-300">admin123</b></p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Poderá alterar a senha e gerir utilizadores após entrar.</p>
+                </div>
+            </div>
+
+            <!-- Formulário de Login -->
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Utilizador *</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" id="login-username" required placeholder="admin" autocomplete="username" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Palavra-passe *</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-10 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+                        <button type="button" onclick="toggleLoginPassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white">
+                            <i id="eye-login-pass" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mensagem de Erro/Alerta -->
+                <div id="login-alert" class="hidden text-xs p-3 rounded-xl border"></div>
+
+                <button type="submit" id="btn-login-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-xl text-sm transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span>Entrar no Sistema</span>
+                </button>
+            </form>
+
+            <div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                <span id="login-conn-indicator" class="flex items-center gap-1.5"><i class="fa-solid fa-cloud text-emerald-400"></i> Supabase Conectado</span>
+                <button onclick="openConfigModal()" class="text-blue-400 hover:underline">Configurar Ligação</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================================== -->
+    <!-- 2. PAINEL PRINCIPAL (APÓS LOGIN BEM-SUCEDIDO) -->
+    <!-- ============================================================================== -->
+    <div id="app-view" class="hidden flex-1 flex-col">
+
+        <!-- CABEÇALHO SUPERIOR -->
+        <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 px-4 sm:px-6 py-3">
+            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
+                
+                <!-- Logo & Estado Cloud -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/30">
+                        <i class="fa-solid fa-tv text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-bold text-white tracking-wide">Gestão de Clientes TV</h1>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <p class="text-xs text-emerald-400 font-medium">Supabase Cloud (Online)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação & Perfil -->
+                <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto justify-end">
+                    
+                    <!-- Novo Cliente -->
+                    <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm transition flex items-center gap-1.5 shadow-lg shadow-blue-500/20">
+                        <i class="fa-solid fa-plus"></i> <span>Novo Cliente</span>
+                    </button>
+
+                    <!-- Gestão de Utilizadores (Apenas Root / Admin) -->
+                    <button id="btn-user-mgmt" onclick="openUserMgmtModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 shadow-lg shadow-purple-600/20" title="Gerir Utilizadores do Sistema (Root)">
+                        <i class="fa-solid fa-users-gear"></i> <span>Utilizadores</span>
+                    </button>
+
+                    <!-- Upload CSV para o Supabase -->
+                    <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 cursor-pointer border border-slate-700" title="Upload de ficheiro CSV para a base de dados Supabase">
+                        <i class="fa-solid fa-file-arrow-up text-amber-400"></i> <span class="hidden sm:inline">Upload CSV</span>
+                        <input type="file" accept=".csv,text/csv" onchange="uploadCSVToSupabase(event)" class="hidden">
+                    </label>
+
+                    <!-- Guardar Cópia CSV -->
+                    <button onclick="downloadCSVReport()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700" title="Exportar CSV da base de dados">
+                        <i class="fa-solid fa-download text-blue-400"></i> <span class="hidden sm:inline">Guardar CSV</span>
+                    </button>
+
+                    <!-- PDF -->
+                    <button onclick="exportPDF()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700" title="Relatório PDF">
+                        <i class="fa-solid fa-file-pdf text-red-400"></i> <span class="hidden md:inline">PDF</span>
+                    </button>
+
+                    <!-- Minha Senha -->
+                    <button onclick="openChangeMyPasswordModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-700" title="Alterar a Minha Senha">
+                        <i class="fa-solid fa-key text-yellow-400"></i> <span class="hidden lg:inline">Minha Senha</span>
+                    </button>
+
+                    <!-- Sair -->
+                    <button onclick="handleLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition flex items-center gap-1.5 border border-red-500/30" title="Terminar Sessão">
+                        <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-5">
+
+            <!-- Identificação do Utilizador Ativo -->
+            <div class="flex items-center justify-between text-xs text-slate-400 bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-800">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>Sessão iniciada como: <b id="logged-user-display" class="text-white font-mono">admin</b></span>
+                    <span id="logged-user-role-badge" class="px-2 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase font-semibold">ROOT</span>
+                </div>
+                <div id="results-count" class="text-slate-400">0 clientes no Supabase</div>
+            </div>
+
+            <!-- Cartões de Resumo -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3.5 shadow-lg">
+                    <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl text-lg sm:text-xl"><i class="fa-solid fa-users"></i></div>
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase">Total</p>
+                        <h3 id="stat-total" class="text-xl sm:text-2xl font-bold text-white">0</h3>
+                    </div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3.5 shadow-lg">
+                    <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl text-lg sm:text-xl"><i class="fa-solid fa-circle-check"></i></div>
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase">Regulares</p>
+                        <h3 id="stat-active" class="text-xl sm:text-2xl font-bold text-white">0</h3>
+                    </div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3.5 shadow-lg">
+                    <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl text-lg sm:text-xl"><i class="fa-solid fa-clock"></i></div>
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase">A Vencer (7d)</p>
+                        <h3 id="stat-warning" class="text-xl sm:text-2xl font-bold text-white">0</h3>
+                    </div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3.5 shadow-lg">
+                    <div class="p-3 bg-red-500/10 text-red-400 rounded-xl text-lg sm:text-xl"><i class="fa-solid fa-circle-exclamation"></i></div>
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase">Em Atraso</p>
+                        <h3 id="stat-overdue" class="text-xl sm:text-2xl font-bold text-white">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pesquisa e Filtros -->
+            <div class="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between shadow-lg">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+                    <div class="relative flex-1">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i class="fa-solid fa-search"></i></span>
+                        <input type="text" id="search-input" oninput="renderUI()" placeholder="Pesquisar cliente, contacto, user, serviço ou link..." class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <select id="filter-status" onchange="renderUI()" class="bg-slate-950 border border-slate-800 rounded-xl py-2 px-3.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <option value="all">Todos os Estados</option>
+                        <option value="active">Regulares</option>
+                        <option value="warning">A Vencer (Próx. 7 dias)</option>
+                        <option value="overdue">Em Atraso</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- VISTA DESKTOP (TABELA) -->
+            <div class="hidden md:block bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950/80 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                                <th class="p-4">Cliente / Contacto</th>
+                                <th class="p-4">Serviço TV</th>
+                                <th class="p-4">Acessos (User / Senha)</th>
+                                <th class="p-4">Link / Painel</th>
+                                <th class="p-4">Valor</th>
+                                <th class="p-4">Vencimento</th>
+                                <th class="p-4">Estado</th>
+                                <th class="p-4 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clients-tbody" class="divide-y divide-slate-800/80 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VISTA TELEMÓVEL (CARTÕES RESPONSIVOS) -->
+            <div id="clients-mobile" class="md:hidden space-y-3"></div>
+
+        </main>
+    </div>
+
+    <!-- ============================================================================== -->
+    <!-- 3. MODAIS -->
+    <!-- ============================================================================== -->
+
+    <!-- MODAL 1: GESTÃO DE UTILIZADORES DO SISTEMA (ROOT) -->
+    <div id="user-mgmt-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-users-gear text-purple-400 text-lg"></i>
+                    <h3 class="font-bold text-base sm:text-lg text-white">Gestão de Utilizadores do Sistema</h3>
+                </div>
+                <button onclick="closeUserMgmtModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-5 sm:p-6 space-y-4">
+                
+                <div class="flex justify-between items-center">
+                    <p class="text-xs text-slate-400">Apenas o administrador <b class="text-white">root</b> pode criar e gerir utilizadores com acesso ao painel.</p>
+                    <button onclick="openNewUserModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-user-plus"></i> Novo Utilizador
+                    </button>
+                </div>
+
+                <!-- Tabela de Utilizadores -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-900 border-b border-slate-800 text-[10px] font-semibold text-slate-400 uppercase">
+                                <th class="p-3">Utilizador</th>
+                                <th class="p-3">Nome</th>
+                                <th class="p-3">Cargo</th>
+                                <th class="p-3 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody" class="divide-y divide-slate-800/80"></tbody>
+                    </table>
+                </div>
+
+                <div class="pt-3 flex justify-end border-t border-slate-800">
+                    <button type="button" onclick="closeUserMgmtModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CRIAR / EDITAR UTILIZADOR DO SISTEMA -->
+    <div id="new-user-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl my-8">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                <h3 id="new-user-modal-title" class="font-bold text-base text-white">Criar Novo Utilizador</h3>
+                <button onclick="closeNewUserModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleSaveSystemUser(event)" class="p-5 sm:p-6 space-y-4">
+                <input type="hidden" id="edit-user-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nome Completo *</label>
+                    <input type="text" id="sys-user-name" required placeholder="Ex: Rui Lopes" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nome de Utilizador (Login) *</label>
+                    <input type="text" id="sys-user-username" required placeholder="Ex: rui.lopes" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Cargo / Permissão *</label>
+                    <select id="sys-user-role" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <option value="admin">Administrador</option>
+                        <option value="root">Super Administrador (Root)</option>
+                    </select>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label id="sys-user-pwd-label" class="text-xs font-semibold text-slate-400 uppercase">Palavra-passe *</label>
+                        <button type="button" onclick="generateSysUserPassword()" class="text-xs text-blue-400 hover:underline">Gerar</button>
+                    </div>
+                    <input type="text" id="sys-user-pwd" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm font-mono text-white focus:outline-none focus:border-blue-500" placeholder="Mínimo 6 caracteres">
+                    <p id="sys-user-pwd-hint" class="text-[11px] text-slate-500 mt-1 hidden">Deixe em branco se não pretender alterar a senha.</p>
+                </div>
+                <div class="pt-3 flex justify-end gap-3 border-t border-slate-800">
+                    <button type="button" onclick="closeNewUserModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-purple-600/20">Guardar Utilizador</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: ALTERAR A MINHA SENHA -->
+    <div id="change-my-pwd-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl my-8">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-key text-yellow-400"></i>
+                    <h3 class="font-bold text-base text-white">Alterar a Minha Senha</h3>
+                </div>
+                <button onclick="closeChangeMyPasswordModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleSaveMyPassword(event)" class="p-5 sm:p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Palavra-passe Atual *</label>
+                    <input type="password" id="my-pwd-old" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nova Palavra-passe *</label>
+                    <input type="password" id="my-pwd-new" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Confirmar Nova Palavra-passe *</label>
+                    <input type="password" id="my-pwd-confirm" required minlength="6" placeholder="Repita a nova palavra-passe" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="pt-3 flex justify-end gap-3 border-t border-slate-800">
+                    <button type="button" onclick="closeChangeMyPasswordModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20">Atualizar Senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CRIAR / EDITAR CLIENTE DE TV -->
+    <div id="client-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                <h3 id="modal-title" class="font-bold text-base sm:text-lg text-white">Novo Cliente de Serviço TV</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="client-form" onsubmit="saveClient(event)" class="p-5 sm:p-6 space-y-4">
+                <input type="hidden" id="client-id">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nome do Cliente *</label>
+                        <input type="text" id="c-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: João Silva">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Contacto / WhatsApp</label>
+                        <input type="text" id="c-phone" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: +351 912345678">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Tipo de Serviço TV *</label>
+                        <input type="text" id="c-service" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: IPTV Premium">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Valor (€) *</label>
+                        <input type="number" step="0.01" min="0" id="c-price" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: 10.00">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Utilizador (User)</label>
+                        <input type="text" id="c-user" autocomplete="off" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: cliente123">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-semibold text-slate-400 uppercase">Palavra-passe (Pass)</label>
+                            <button type="button" onclick="generatePasswordForForm()" class="text-[10px] text-blue-400 hover:underline">Gerar</button>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="c-pass" autocomplete="new-password" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 pr-10 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: senha123">
+                            <button type="button" onclick="toggleFormPassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white">
+                                <i id="eye-modal-pass" class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Link (URL / Painel / M3U)</label>
+                    <input type="text" id="c-link" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Ex: http://servidor.com/get.php?...">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Data Próximo Pagamento *</label>
+                    <input type="date" id="c-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="pt-3 flex justify-end gap-3 border-t border-slate-800">
+                    <button type="button" onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl text-sm transition">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-lg shadow-blue-500/20">Guardar no Supabase</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 5: ALTERAR SENHA DO CLIENTE (RÁPIDO) -->
+    <div id="client-password-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl my-8">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-key text-yellow-400"></i>
+                    <h3 class="font-bold text-base sm:text-lg text-white">Alterar Senha do Cliente</h3>
+                </div>
+                <button onclick="closeClientPasswordModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="saveClientPassword(event)" class="p-5 sm:p-6 space-y-4">
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs space-y-1">
+                    <p class="text-slate-400">Cliente: <b id="pwd-modal-client-name" class="text-white text-sm"></b></p>
+                    <p class="text-slate-400">Utilizador: <span id="pwd-modal-client-user" class="font-mono text-blue-400"></span></p>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-semibold text-slate-400 uppercase">Nova Palavra-passe *</label>
+                        <button type="button" onclick="generatePasswordForQuickModal()" class="text-xs text-blue-400 hover:underline flex items-center gap-1">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Segura
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="pwd-modal-input" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 pr-10 text-sm font-mono text-white focus:outline-none focus:border-blue-500">
+                        <button type="button" onclick="copyModalPassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white" title="Copiar Senha">
+                            <i class="fa-solid fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-3 flex justify-end gap-3 border-t border-slate-800">
+                    <button type="button" onclick="closeClientPasswordModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl text-sm transition">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-lg shadow-blue-500/20">Atualizar Senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 6: CONFIGURAÇÃO SUPABASE -->
+    <div id="config-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-cloud text-emerald-400"></i>
+                    <h3 class="font-bold text-base sm:text-lg text-white">Configuração Supabase Cloud</h3>
+                </div>
+                <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-5 sm:p-6 space-y-4">
+                <p class="text-xs text-slate-400">Pode colocar estes valores diretamente no ficheiro <b>config.js</b> para o GitHub Pages ficar automaticamente conectado!</p>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Project URL *</label>
+                    <input type="url" id="cfg-supabase-url" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white font-mono focus:outline-none focus:border-blue-500" placeholder="https://xxxxxxxx.supabase.co">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Anon Public Key *</label>
+                    <input type="password" id="cfg-supabase-key" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white font-mono focus:outline-none focus:border-blue-500" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                </div>
+
+                <div id="cfg-status-box" class="hidden text-xs p-3 rounded-xl border"></div>
+
+                <div class="pt-2 flex justify-between items-center border-t border-slate-800">
+                    <button type="button" onclick="testSupabaseConnection()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 px-3.5 rounded-xl font-medium text-xs transition flex items-center gap-1.5 border border-slate-700">
+                        <i class="fa-solid fa-bolt text-amber-400"></i> Testar Ligação
+                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="closeConfigModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs transition">Cancelar</button>
+                        <button type="button" onclick="saveSupabaseConfig()" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20">Guardar & Conectar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================================== -->
+    <!-- 4. LÓGICA E JAVASCRIPT -->
+    <!-- ============================================================================== -->
+    <script>
+        const SUPABASE_STORAGE_URL = 'gestao_tv_supabase_url';
+        const SUPABASE_STORAGE_KEY = 'gestao_tv_supabase_key';
+        const SESSION_USER_KEY = 'gestao_tv_logged_user';
+
+        let supabaseClient = null;
+        let realtimeSubscription = null;
+        let clients = [];
+        let currentUser = null;
+        let currentEditingClientId = null;
+        let visiblePasswords = {};
+
+        // ==========================================
+        // 1. INICIALIZAÇÃO & VERIFICAÇÃO DE SESSÃO
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initializeSupabase();
+        });
+
+        async function initializeSupabase() {
+            const config = await resolveSupabaseConfig();
+            if (!config.url || !config.key || !window.supabase) {
+                openConfigModal();
+                return;
+            }
+
+            try {
+                supabaseClient = window.supabase.createClient(config.url, config.key);
+                
+                // Verifica se já existia uma sessão guardada no navegador
+                const savedSession = sessionStorage.getItem(SESSION_USER_KEY) || localStorage.getItem(SESSION_USER_KEY);
+                if (savedSession) {
+                    try {
+                        currentUser = JSON.parse(savedSession);
+                        showAppView(currentUser);
+                        await fetchClientsFromSupabase();
+                        setupRealtime();
+                        return;
+                    } catch (e) {
+                        sessionStorage.removeItem(SESSION_USER_KEY);
+                        localStorage.removeItem(SESSION_USER_KEY);
+                    }
+                }
+
+                showLoginView();
+            } catch (err) {
+                console.error('Erro na inicialização do Supabase:', err);
+                openConfigModal();
+            }
+        }
+
+        async function resolveSupabaseConfig() {
+            // 1. Prioridade: config.js (window.ENV)
+            let url = (typeof window.ENV !== 'undefined' && window.ENV.SUPABASE_URL && !window.ENV.SUPABASE_URL.includes('SEU-PROJETO'))
+                ? window.ENV.SUPABASE_URL.trim()
+                : '';
+            let key = (typeof window.ENV !== 'undefined' && window.ENV.SUPABASE_ANON_KEY && !window.ENV.SUPABASE_ANON_KEY.includes('SUA-CHAVE'))
+                ? window.ENV.SUPABASE_ANON_KEY.trim()
+                : '';
+
+            // 2. localStorage
+            if (!url) url = (localStorage.getItem(SUPABASE_STORAGE_URL) || '').trim();
+            if (!key) key = (localStorage.getItem(SUPABASE_STORAGE_KEY) || '').trim();
+
+            return { url, key };
+        }
+
+        // ==========================================
+        // 2. AUTENTICAÇÃO SEGURA (BCRYPT NO SUPABASE)
+        // ==========================================
+        function showLoginView() {
+            document.getElementById('login-view').classList.remove('hidden');
+            document.getElementById('app-view').classList.add('hidden');
+            document.getElementById('app-view').classList.remove('flex');
+            hideLoginAlert();
+        }
+
+        function showAppView(user) {
+            currentUser = user;
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('app-view').classList.remove('hidden');
+            document.getElementById('app-view').classList.add('flex');
+
+            document.getElementById('logged-user-display').innerText = user.username || user.nome;
+            const badge = document.getElementById('logged-user-role-badge');
+            badge.innerText = (user.role || 'ADMIN').toUpperCase();
+
+            // Mostra botão de gestão de utilizadores apenas para root
+            const btnMgmt = document.getElementById('btn-user-mgmt');
+            if (btnMgmt) {
+                if (user.role === 'root') btnMgmt.classList.remove('hidden');
+                else btnMgmt.classList.add('hidden');
+            }
+        }
+
+        async function handleLoginSubmit(e) {
+            e.preventDefault();
+            if (!supabaseClient) {
+                showLoginAlert('Supabase não conectado. Configure o URL e a Chave no rodapé.');
+                return;
+            }
+
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            hideLoginAlert();
+            const btn = document.getElementById('btn-login-submit');
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+
+            try {
+                // Chama a função PostgreSQL autenticar_usuario com verificação bcrypt
+                const { data, error } = await supabaseClient.rpc('autenticar_usuario', {
+                    p_username: username,
+                    p_password: password
+                });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    showLoginAlert('Utilizador ou palavra-passe incorretos.');
+                    return;
+                }
+
+                const user = data[0];
+                currentUser = user;
+                sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
+                localStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
+
+                showAppView(user);
+                await fetchClientsFromSupabase();
+                setupRealtime();
+            } catch (err) {
+                console.error('Erro de autenticação:', err);
+                showLoginAlert(err.message || 'Erro ao validar utilizador.');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-70');
+            }
+        }
+
+        function showLoginAlert(msg) {
+            const box = document.getElementById('login-alert');
+            box.classList.remove('hidden');
+            box.className = 'text-xs p-3 rounded-xl border bg-red-500/10 text-red-300 border-red-500/30 flex items-center gap-2';
+            box.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${escapeHTML(msg)}</span>`;
+        }
+
+        function hideLoginAlert() {
+            const box = document.getElementById('login-alert');
+            if (box) box.classList.add('hidden');
+        }
+
+        function toggleLoginPassword() {
+            const input = document.getElementById('login-password');
+            const icon = document.getElementById('eye-login-pass');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        function handleLogout() {
+            if (!confirm('Deseja realmente terminar a sessão?')) return;
+            sessionStorage.removeItem(SESSION_USER_KEY);
+            localStorage.removeItem(SESSION_USER_KEY);
+            currentUser = null;
+            showLoginView();
+        }
+
+        // ==========================================
+        // 3. GESTÃO DE UTILIZADORES DO SISTEMA (ROOT)
+        // ==========================================
+        async function openUserMgmtModal() {
+            if (!currentUser || currentUser.role !== 'root') {
+                alert('Apenas o utilizador root tem permissão para gerir utilizadores.');
+                return;
+            }
+            const modal = document.getElementById('user-mgmt-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            await loadSystemUsers();
+        }
+
+        function closeUserMgmtModal() {
+            const modal = document.getElementById('user-mgmt-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function loadSystemUsers() {
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">A carregar utilizadores...</td></tr>';
+
+            try {
+                const { data, error } = await supabaseClient.rpc('listar_usuarios');
+                if (error) throw error;
+
+                tbody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">Nenhum utilizador encontrado.</td></tr>';
+                    return;
+                }
+
+                data.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-900/60 transition';
+                    const isRoot = (u.role === 'root');
+                    tr.innerHTML = `
+                        <td class="p-3 font-mono font-medium text-white">${escapeHTML(u.username)}</td>
+                        <td class="p-3 text-slate-300">${escapeHTML(u.nome || '-')}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${isRoot ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'}">
+                                ${escapeHTML(u.role)}
+                            </span>
+                        </td>
+                        <td class="p-3 text-right space-x-1">
+                            <button onclick="openEditUserModal('${escapeHTML(u.id)}', '${escapeHTML(u.username)}', '${escapeHTML(u.nome)}', '${escapeHTML(u.role)}')" class="p-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white rounded-lg transition" title="Editar / Alterar Senha">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            ${!isRoot ? `
+                                <button onclick="deleteSystemUser('${escapeHTML(u.id)}', '${escapeHTML(u.username)}')" class="p-1.5 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded-lg transition" title="Apagar Utilizador">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            ` : '<span class="text-slate-600 text-[10px] p-1.5">Root protegido</span>'}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error('Erro ao listar utilizadores:', err);
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-400">Erro: ${escapeHTML(err.message)}</td></tr>`;
+            }
+        }
+
+        function openNewUserModal() {
+            document.getElementById('new-user-modal-title').innerText = 'Criar Novo Utilizador';
+            document.getElementById('edit-user-id').value = '';
+            document.getElementById('sys-user-name').value = '';
+            document.getElementById('sys-user-username').value = '';
+            document.getElementById('sys-user-username').readOnly = false;
+            document.getElementById('sys-user-role').value = 'admin';
+            document.getElementById('sys-user-pwd').value = '';
+            document.getElementById('sys-user-pwd').required = true;
+            document.getElementById('sys-user-pwd-hint').classList.add('hidden');
+
+            const modal = document.getElementById('new-user-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function openEditUserModal(id, username, nome, role) {
+            document.getElementById('new-user-modal-title').innerText = `Editar Utilizador (${username})`;
+            document.getElementById('edit-user-id').value = id;
+            document.getElementById('sys-user-name').value = nome;
+            document.getElementById('sys-user-username').value = username;
+            document.getElementById('sys-user-role').value = role;
+            document.getElementById('sys-user-pwd').value = '';
+            document.getElementById('sys-user-pwd').required = false;
+            document.getElementById('sys-user-pwd-hint').classList.remove('hidden');
+
+            const modal = document.getElementById('new-user-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeNewUserModal() {
+            const modal = document.getElementById('new-user-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function generateSysUserPassword() {
+            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
+            let res = '';
+            for (let i = 0; i < 9; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            document.getElementById('sys-user-pwd').value = res;
+        }
+
+        async function handleSaveSystemUser(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-user-id').value.trim() || null;
+            const nome = document.getElementById('sys-user-name').value.trim();
+            const username = document.getElementById('sys-user-username').value.trim().toLowerCase();
+            const role = document.getElementById('sys-user-role').value;
+            const pwd = document.getElementById('sys-user-pwd').value;
+
+            try {
+                const { data, error } = await supabaseClient.rpc('salvar_usuario', {
+                    p_id: id,
+                    p_username: username,
+                    p_password: pwd,
+                    p_nome: nome,
+                    p_role: role
+                });
+
+                if (error) throw error;
+                if (data && !data.success) throw new Error(data.error || 'Erro ao guardar utilizador.');
+
+                alert('Utilizador guardado com sucesso!');
+                closeNewUserModal();
+                await loadSystemUsers();
+            } catch (err) {
+                alert('Erro ao guardar utilizador: ' + (err.message || err));
+            }
+        }
+
+        async function deleteSystemUser(id, username) {
+            if (!confirm(`Tem a certeza de que deseja apagar o utilizador "${username}" do sistema?`)) return;
+
+            try {
+                const { data, error } = await supabaseClient.rpc('apagar_usuario', { p_id: id });
+                if (error) throw error;
+                if (data && !data.success) throw new Error(data.error);
+
+                alert(`Utilizador "${username}" apagado com sucesso.`);
+                await loadSystemUsers();
+            } catch (err) {
+                alert('Erro ao apagar utilizador: ' + (err.message || err));
+            }
+        }
+
+        // ==========================================
+        // 4. ALTERAR A MINHA PRÓPRIA SENHA
+        // ==========================================
+        function openChangeMyPasswordModal() {
+            document.getElementById('my-pwd-old').value = '';
+            document.getElementById('my-pwd-new').value = '';
+            document.getElementById('my-pwd-confirm').value = '';
+            const modal = document.getElementById('change-my-pwd-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeChangeMyPasswordModal() {
+            const modal = document.getElementById('change-my-pwd-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function handleSaveMyPassword(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const oldPass = document.getElementById('my-pwd-old').value;
+            const newPass = document.getElementById('my-pwd-new').value;
+            const confirmPass = document.getElementById('my-pwd-confirm').value;
+
+            if (newPass !== confirmPass) {
+                alert('A nova palavra-passe e a confirmação não coincidem.');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient.rpc('alterar_minha_senha', {
+                    p_user_id: currentUser.id,
+                    p_old_pass: oldPass,
+                    p_new_pass: newPass
+                });
+
+                if (error) throw error;
+                if (data && !data.success) throw new Error(data.error);
+
+                alert('A sua palavra-passe foi atualizada com sucesso!');
+                closeChangeMyPasswordModal();
+            } catch (err) {
+                alert('Erro ao atualizar senha: ' + (err.message || err));
+            }
+        }
+
+        // ==========================================
+        // 5. GESTÃO DE CLIENTES TV NO SUPABASE
+        // ==========================================
+        async function fetchClientsFromSupabase() {
+            if (!supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('clientes')
+                    .select('*')
+                    .order('date', { ascending: true });
+
+                if (error) throw error;
+                clients = data || [];
+                renderUI();
+            } catch (err) {
+                console.error('Erro ao ler clientes do Supabase:', err);
+            }
+        }
+
+        function setupRealtime() {
+            if (!supabaseClient) return;
+            try {
+                if (realtimeSubscription) {
+                    supabaseClient.removeChannel(realtimeSubscription);
+                }
+                realtimeSubscription = supabaseClient
+                    .channel('clientes_realtime_sync')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'clientes' }, () => {
+                        fetchClientsFromSupabase();
+                    })
+                    .subscribe();
+            } catch (e) {
+                console.warn('Realtime subscription error:', e);
+            }
+        }
+
+        function openModal(id = null) {
+            const modal = document.getElementById('client-modal');
+            const passInput = document.getElementById('c-pass');
+            const eyeIcon = document.getElementById('eye-modal-pass');
+            passInput.type = 'password';
+            eyeIcon.className = 'fa-solid fa-eye';
+
+            if (id !== null && id !== undefined) {
+                const c = clients.find(x => String(x.id) === String(id));
+                if (!c) return;
+                document.getElementById('modal-title').innerText = 'Editar Cliente';
+                document.getElementById('client-id').value = String(c.id);
+                document.getElementById('c-name').value = c.name ?? '';
+                document.getElementById('c-phone').value = c.phone ?? '';
+                document.getElementById('c-service').value = c.service ?? '';
+                document.getElementById('c-price').value = Number(c.price ?? 0);
+                document.getElementById('c-user').value = c.user ?? '';
+                document.getElementById('c-pass').value = c.pass ?? '';
+                document.getElementById('c-link').value = c.link ?? '';
+                document.getElementById('c-date').value = c.date ?? '';
+            } else {
+                document.getElementById('modal-title').innerText = 'Novo Cliente de Serviço TV';
+                document.getElementById('client-form').reset();
+                document.getElementById('client-id').value = '';
+                document.getElementById('c-date').value = new Date().toISOString().split('T')[0];
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('client-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function saveClient(e) {
+            e.preventDefault();
+            if (!supabaseClient) return;
+
+            const existingId = document.getElementById('client-id').value.trim();
+            const clientData = {
+                name: document.getElementById('c-name').value.trim(),
+                phone: document.getElementById('c-phone').value.trim(),
+                service: document.getElementById('c-service').value.trim(),
+                price: parseFloat(document.getElementById('c-price').value) || 0,
+                user: document.getElementById('c-user').value.trim(),
+                pass: document.getElementById('c-pass').value.trim(),
+                link: document.getElementById('c-link').value.trim(),
+                date: document.getElementById('c-date').value
+            };
+
+            try {
+                if (existingId) {
+                    const { error } = await supabaseClient
+                        .from('clientes')
+                        .update(clientData)
+                        .eq('id', existingId);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient
+                        .from('clientes')
+                        .insert([clientData]);
+                    if (error) throw error;
+                }
+
+                closeModal();
+                await fetchClientsFromSupabase();
+            } catch (err) {
+                console.error('Erro ao guardar cliente:', err);
+                alert('Erro ao guardar no Supabase: ' + (err.message || err));
+            }
+        }
+
+        async function deleteClient(id) {
+            const target = clients.find(x => String(x.id) === String(id));
+            if (!target) return;
+            if (!confirm(`Tem a certeza de que deseja apagar definitivamente o cliente "${target.name}" da base de dados Supabase?`)) {
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('clientes')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+                await fetchClientsFromSupabase();
+            } catch (err) {
+                console.error('Erro ao eliminar cliente:', err);
+                alert('Erro ao eliminar no Supabase: ' + (err.message || err));
+            }
+        }
+
+        // ==========================================
+        // 6. GESTÃO DE SENHA DO CLIENTE (RÁPIDO)
+        // ==========================================
+        function generatePasswordForForm() {
+            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
+            let res = '';
+            for (let i = 0; i < 9; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            const input = document.getElementById('c-pass');
+            input.value = res;
+            input.type = 'text';
+            document.getElementById('eye-modal-pass').className = 'fa-solid fa-eye-slash';
+        }
+
+        function openClientPasswordModal(id) {
+            const c = clients.find(x => String(x.id) === String(id));
+            if (!c) return;
+            currentEditingClientId = String(id);
+            document.getElementById('pwd-modal-client-name').innerText = c.name;
+            document.getElementById('pwd-modal-client-user').innerText = c.user || 'Sem utilizador';
+            document.getElementById('pwd-modal-input').value = c.pass || '';
+
+            const modal = document.getElementById('client-password-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeClientPasswordModal() {
+            currentEditingClientId = null;
+            const modal = document.getElementById('client-password-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function generatePasswordForQuickModal() {
+            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
+            let res = '';
+            for (let i = 0; i < 9; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            document.getElementById('pwd-modal-input').value = res;
+        }
+
+        function copyModalPassword() {
+            const val = document.getElementById('pwd-modal-input').value;
+            if (!val) return;
+            navigator.clipboard.writeText(val);
+            alert('Palavra-passe copiada!');
+        }
+
+        async function saveClientPassword(e) {
+            e.preventDefault();
+            if (!currentEditingClientId || !supabaseClient) return;
+
+            const newPass = document.getElementById('pwd-modal-input').value.trim();
+            try {
+                const { error } = await supabaseClient
+                    .from('clientes')
+                    .update({ pass: newPass })
+                    .eq('id', currentEditingClientId);
+
+                if (error) throw error;
+                closeClientPasswordModal();
+                await fetchClientsFromSupabase();
+                alert('Palavra-passe do cliente atualizada com sucesso no Supabase!');
+            } catch (err) {
+                alert('Erro ao atualizar palavra-passe: ' + (err.message || err));
+            }
+        }
+
+        // ==========================================
+        // 7. UPLOAD & DOWNLOAD CSV PARA O SUPABASE
+        // ==========================================
+        async function uploadCSVToSupabase(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!supabaseClient) {
+                alert('A aplicação não está conectada ao Supabase.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const text = e.target.result;
+                    const parsed = parseCSVText(text);
+
+                    if (!parsed || parsed.length === 0) {
+                        alert('O ficheiro CSV está vazio ou em formato inválido.');
+                        return;
+                    }
+
+                    if (!confirm(`Deseja importar ${parsed.length} cliente(s) do ficheiro CSV diretamente para a base de dados Supabase?`)) {
+                        event.target.value = '';
+                        return;
+                    }
+
+                    const rows = parsed.map(c => ({
+                        name: c.name || 'Sem Nome',
+                        phone: c.phone || '',
+                        service: c.service || '',
+                        price: parseFloat(c.price) || 0,
+                        user: c.user || '',
+                        pass: c.pass || '',
+                        link: c.link || '',
+                        date: c.date || new Date().toISOString().split('T')[0]
+                    }));
+
+                    const { data, error } = await supabaseClient
+                        .from('clientes')
+                        .insert(rows)
+                        .select();
+
+                    if (error) throw error;
+
+                    alert(`Sucesso! ${data.length} cliente(s) importado(s) para o Supabase.`);
+                    await fetchClientsFromSupabase();
+                } catch (err) {
+                    console.error('Erro ao importar CSV:', err);
+                    alert('Erro na importação: ' + (err.message || err));
+                } finally {
+                    event.target.value = '';
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function parseCSVText(rawText) {
+            if (!rawText) return [];
+            const text = rawText.replace(/^\uFEFF/, '').trim();
+            if (!text) return [];
+
+            const lines = text.split(/\r?\n/);
+            if (lines.length < 2) return [];
+
+            const delimiter = (lines[0].split(';').length > lines[0].split(',').length) ? ';' : ',';
+
+            const parseLine = (line) => {
+                const result = [];
+                let cur = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const ch = line[i];
+                    if (inQuotes) {
+                        if (ch === '"') {
+                            if (i + 1 < line.length && line[i + 1] === '"') {
+                                cur += '"';
+                                i++;
+                            } else {
+                                inQuotes = false;
+                            }
+                        } else {
+                            cur += ch;
+                        }
+                    } else {
+                        if (ch === '"') {
+                            inQuotes = true;
+                        } else if (ch === delimiter) {
+                            result.push(cur.trim());
+                            cur = '';
+                        } else {
+                            cur += ch;
+                        }
+                    }
+                }
+                result.push(cur.trim());
+                return result;
+            };
+
+            const parsedClients = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const cols = parseLine(line);
+
+                if (cols.length >= 9) {
+                    parsedClients.push({
+                        name: cols[1] || 'Sem Nome',
+                        phone: cols[2] || '',
+                        service: cols[3] || '',
+                        user: cols[4] || '',
+                        pass: cols[5] || '',
+                        link: cols[6] || '',
+                        price: parseFloat(String(cols[7]).replace(',', '.')) || 0,
+                        date: cols[8] || new Date().toISOString().split('T')[0]
+                    });
+                } else if (cols.length >= 8) {
+                    parsedClients.push({
+                        name: cols[0] || 'Sem Nome',
+                        phone: cols[1] || '',
+                        service: cols[2] || '',
+                        user: cols[3] || '',
+                        pass: cols[4] || '',
+                        link: cols[5] || '',
+                        price: parseFloat(String(cols[6]).replace(',', '.')) || 0,
+                        date: cols[7] || new Date().toISOString().split('T')[0]
+                    });
+                }
+            }
+            return parsedClients;
+        }
+
+        function downloadCSVReport() {
+            if (clients.length === 0) {
+                alert('Não existem clientes para exportar.');
+                return;
+            }
+
+            const headers = ['ID', 'Nome', 'Contacto', 'Servico', 'Utilizador', 'Password', 'Link', 'Valor', 'DataVencimento'];
+            const escapeCSV = (val) => `"${String(val ?? '').replace(/"/g, '""').trim()}"`;
+
+            let rows = [headers.join(';')];
+            clients.forEach(c => {
+                rows.push([
+                    escapeCSV(c.id),
+                    escapeCSV(c.name),
+                    escapeCSV(c.phone),
+                    escapeCSV(c.service),
+                    escapeCSV(c.user),
+                    escapeCSV(c.pass),
+                    escapeCSV(c.link),
+                    escapeCSV(Number(c.price || 0).toFixed(2)),
+                    escapeCSV(c.date)
+                ].join(';'));
+            });
+
+            const blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `clientes_tv_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ==========================================
+        // 8. RENDERIZAÇÃO DA TABELA & CARTÕES
+        // ==========================================
+        function escapeHTML(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function toggleFormPassword() {
+            const input = document.getElementById('c-pass');
+            const icon = document.getElementById('eye-modal-pass');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        function toggleRowPassword(id) {
+            visiblePasswords[id] = !visiblePasswords[id];
+            renderUI();
+        }
+
+        function copyToClipboard(text) {
+            if (!text) return;
+            navigator.clipboard.writeText(text);
+        }
+
+        function getStatus(dateStr) {
+            if (!dateStr) return 'active';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return 'active';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const due = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            due.setHours(0, 0, 0, 0);
+
+            const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+            if (diffDays < 0) return 'overdue';
+            if (diffDays <= 7) return 'warning';
+            return 'active';
+        }
+
+        function getStatusBadge(status) {
+            if (status === 'active') {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle text-[6px]"></i> Regular</span>`;
+            }
+            if (status === 'warning') {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fa-solid fa-circle text-[6px]"></i> A Vencer</span>`;
+            }
+            return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-circle text-[6px]"></i> Em Atraso</span>`;
+        }
+
+        function sendWhatsApp(id) {
+            const c = clients.find(x => String(x.id) === String(id));
+            if (!c || !c.phone) {
+                alert('Este cliente não tem número de telefone registado.');
+                return;
+            }
+            const cleanPhone = String(c.phone).replace(/\D/g, '');
+            const msg = `Olá ${c.name}, lembrete do seu serviço de TV (${c.service}). O valor de ${Number(c.price || 0).toFixed(2)}€ tem vencimento a ${c.date}. Utilizador: ${c.user || '-'}. Obrigado!`;
+            window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function renderUI() {
+            const tbody = document.getElementById('clients-tbody');
+            const mobileContainer = document.getElementById('clients-mobile');
+            if (!tbody || !mobileContainer) return;
+
+            const query = (document.getElementById('search-input')?.value ?? '').toLowerCase().trim();
+            const statusFilter = document.getElementById('filter-status')?.value ?? 'all';
+
+            let activeCount = 0, warningCount = 0, overdueCount = 0;
+
+            const filtered = clients.filter(c => {
+                const st = getStatus(c.date);
+                if (st === 'active') activeCount++;
+                else if (st === 'warning') warningCount++;
+                else overdueCount++;
+
+                const haystack = [c.name, c.phone, c.service, c.user, c.link]
+                    .map(v => String(v ?? '').toLowerCase())
+                    .join(' ');
+
+                const matchesSearch = !query || haystack.includes(query);
+                const matchesFilter = statusFilter === 'all' || st === statusFilter;
+                return matchesSearch && matchesFilter;
+            });
+
+            document.getElementById('stat-total').innerText = clients.length;
+            document.getElementById('stat-active').innerText = activeCount;
+            document.getElementById('stat-warning').innerText = warningCount;
+            document.getElementById('stat-overdue').innerText = overdueCount;
+            document.getElementById('results-count').innerText = `A mostrar ${filtered.length} de ${clients.length} cliente(s) no Supabase`;
+
+            tbody.innerHTML = '';
+            mobileContainer.innerHTML = '';
+
+            if (filtered.length === 0) {
+                const emptyMsg = `<div class="p-8 text-center text-slate-500 text-sm">Nenhum cliente encontrado.</div>`;
+                tbody.innerHTML = `<tr><td colspan="8">${emptyMsg}</td></tr>`;
+                mobileContainer.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-2xl">${emptyMsg}</div>`;
+                return;
+            }
+
+            filtered.forEach(c => {
+                const st = getStatus(c.date);
+                const badge = getStatusBadge(st);
+                const isPassVisible = !!visiblePasswords[c.id];
+                const safeId = escapeHTML(c.id);
+                const passDisplay = c.pass
+                    ? (isPassVisible ? escapeHTML(c.pass) : '••••••••')
+                    : '-';
+
+                // Desktop Row
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="font-semibold text-white">${escapeHTML(c.name)}</div>
+                        <div class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-phone mr-1"></i>${escapeHTML(c.phone || 'Sem contacto')}</div>
+                    </td>
+                    <td class="p-4 text-slate-200 font-medium">${escapeHTML(c.service)}</td>
+                    <td class="p-4">
+                        <div class="text-xs text-slate-300 flex items-center gap-1.5">
+                            <span><b>U:</b> ${escapeHTML(c.user || '-')}</span>
+                            ${c.user ? `<button onclick="copyToClipboard('${escapeHTML(c.user)}')" class="text-slate-500 hover:text-white" title="Copiar Utilizador"><i class="fa-solid fa-copy text-[10px]"></i></button>` : ''}
+                        </div>
+                        <div class="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
+                            <span><b>P:</b> <span class="font-mono">${passDisplay}</span></span>
+                            ${c.pass ? `
+                                <button onclick="toggleRowPassword('${safeId}')" class="text-slate-400 hover:text-white" title="Mostrar/Ocultar Senha">
+                                    <i class="fa-solid ${isPassVisible ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                                </button>
+                                <button onclick="copyToClipboard('${escapeHTML(c.pass)}')" class="text-slate-500 hover:text-white" title="Copiar Senha">
+                                    <i class="fa-solid fa-copy text-[10px]"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        ${c.link ? `<a href="${escapeHTML(c.link)}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-400 hover:underline truncate block max-w-[180px]" title="${escapeHTML(c.link)}"><i class="fa-solid fa-up-right-from-square mr-1"></i>Abrir Link</a>` : '<span class="text-xs text-slate-500">-</span>'}
+                    </td>
+                    <td class="p-4 font-semibold text-white whitespace-nowrap">${Number(c.price || 0).toFixed(2)} €</td>
+                    <td class="p-4 text-slate-300 whitespace-nowrap">${escapeHTML(c.date)}</td>
+                    <td class="p-4 whitespace-nowrap">${badge}</td>
+                    <td class="p-4 text-right whitespace-nowrap space-x-1">
+                        <button onclick="sendWhatsApp('${safeId}')" class="p-2 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-lg transition" title="Avisar por WhatsApp">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </button>
+                        <button onclick="openClientPasswordModal('${safeId}')" class="p-2 bg-yellow-600/20 hover:bg-yellow-600 text-yellow-400 hover:text-white rounded-lg transition" title="Alterar Senha do Cliente">
+                            <i class="fa-solid fa-key"></i>
+                        </button>
+                        <button onclick="openModal('${safeId}')" class="p-2 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white rounded-lg transition" title="Editar Cliente">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="deleteClient('${safeId}')" class="p-2 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded-lg transition" title="Eliminar Cliente">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+
+                // Mobile Card
+                const card = document.createElement('div');
+                card.className = 'bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start gap-2">
+                        <div>
+                            <h4 class="font-bold text-white text-base">${escapeHTML(c.name)}</h4>
+                            <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-phone mr-1"></i>${escapeHTML(c.phone || 'Sem contacto')}</p>
+                        </div>
+                        ${badge}
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl text-xs border border-slate-800">
+                        <div>
+                            <span class="text-slate-400 block">Serviço:</span>
+                            <span class="text-white font-medium">${escapeHTML(c.service)}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Valor / Vencimento:</span>
+                            <span class="text-white font-semibold">${Number(c.price || 0).toFixed(2)} €</span> <span class="text-slate-400">(${escapeHTML(c.date)})</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Utilizador:</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-slate-200 font-mono">${escapeHTML(c.user || '-')}</span>
+                                ${c.user ? `<button onclick="copyToClipboard('${escapeHTML(c.user)}')" class="text-slate-500 hover:text-white"><i class="fa-solid fa-copy text-[10px]"></i></button>` : ''}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Senha:</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-slate-200 font-mono">${passDisplay}</span>
+                                ${c.pass ? `
+                                    <button onclick="toggleRowPassword('${safeId}')" class="text-slate-400 hover:text-white"><i class="fa-solid ${isPassVisible ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
+                                    <button onclick="copyToClipboard('${escapeHTML(c.pass)}')" class="text-slate-500 hover:text-white"><i class="fa-solid fa-copy text-[10px]"></i></button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-1">
+                        <div>
+                            ${c.link ? `<a href="${escapeHTML(c.link)}" target="_blank" class="text-xs text-blue-400 font-medium"><i class="fa-solid fa-link mr-1"></i>Abrir Painel</a>` : '<span class="text-xs text-slate-500">Sem link</span>'}
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="sendWhatsApp('${safeId}')" class="p-2 bg-emerald-600/20 text-emerald-400 rounded-lg text-xs" title="WhatsApp">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </button>
+                            <button onclick="openClientPasswordModal('${safeId}')" class="p-2 bg-yellow-600/20 text-yellow-400 rounded-lg text-xs" title="Alterar Senha">
+                                <i class="fa-solid fa-key"></i>
+                            </button>
+                            <button onclick="openModal('${safeId}')" class="p-2 bg-blue-600/20 text-blue-400 rounded-lg text-xs" title="Editar">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteClient('${safeId}')" class="p-2 bg-red-600/20 text-red-400 rounded-lg text-xs" title="Eliminar">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                mobileContainer.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // 9. EXPORTAÇÃO PDF
+        // ==========================================
+        function exportPDF() {
+            if (clients.length === 0) {
+                alert('Não existem clientes para exportar.');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+
+            doc.setFontSize(16);
+            doc.setTextColor(30, 41, 59);
+            doc.text('Relatório de Clientes TV - Base de Dados Supabase', 14, 18);
+
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT')}`, 14, 24);
+
+            const statusLabel = (dateStr) => {
+                const st = getStatus(dateStr);
+                if (st === 'active') return 'Regular';
+                if (st === 'warning') return 'A Vencer';
+                return 'Em Atraso';
+            };
+
+            const body = clients.map(c => [
+                c.name || '-',
+                c.phone || '-',
+                c.service || '-',
+                c.user || '-',
+                c.link || '-',
+                `${Number(c.price || 0).toFixed(2)} €`,
+                c.date || '-',
+                statusLabel(c.date)
+            ]);
+
+            doc.autoTable({
+                startY: 30,
+                head: [['Cliente', 'Contacto', 'Serviço TV', 'Utilizador', 'Link', 'Valor', 'Vencimento', 'Estado']],
+                body: body,
+                theme: 'striped',
+                styles: { fontSize: 8, cellPadding: 3 },
+                headStyles: { fillColor: [37, 99, 235] }
+            });
+
+            doc.save(`relatorio_clientes_tv_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        // ==========================================
+        // 10. CONFIGURAÇÃO SUPABASE
+        // ==========================================
+        function openConfigModal() {
+            document.getElementById('cfg-supabase-url').value = localStorage.getItem(SUPABASE_STORAGE_URL) || '';
+            document.getElementById('cfg-supabase-key').value = localStorage.getItem(SUPABASE_STORAGE_KEY) || '';
+            const box = document.getElementById('cfg-status-box');
+            box.className = 'hidden text-xs p-3 rounded-xl border';
+            box.innerHTML = '';
+
+            const modal = document.getElementById('config-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfigModal() {
+            const modal = document.getElementById('config-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function testSupabaseConnection() {
+            const url = document.getElementById('cfg-supabase-url').value.trim();
+            const key = document.getElementById('cfg-supabase-key').value.trim();
+            const box = document.getElementById('cfg-status-box');
+
+            if (!url || !key) {
+                box.className = 'text-xs p-3 rounded-xl border bg-amber-500/10 text-amber-300 border-amber-500/30';
+                box.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Preencha o URL e a Chave Anon.';
+                return;
+            }
+
+            box.className = 'text-xs p-3 rounded-xl border bg-blue-500/10 text-blue-300 border-blue-500/30';
+            box.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> A testar ligação ao Supabase...';
+
+            try {
+                const client = window.supabase.createClient(url, key);
+                const { error } = await client.from('clientes').select('id').limit(1);
+                if (error) throw error;
+
+                box.className = 'text-xs p-3 rounded-xl border bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
+                box.innerHTML = '<i class="fa-solid fa-circle-check mr-1.5"></i> <b>Ligação bem-sucedida!</b> Tabela "clientes" encontrada.';
+            } catch (err) {
+                box.className = 'text-xs p-3 rounded-xl border bg-red-500/10 text-red-300 border-red-500/30';
+                box.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1.5"></i> <b>Erro:</b> ${escapeHTML(err.message || 'Falha de conexão')}. Certifique-se de executar o schema.sql.`;
+            }
+        }
+
+        async function saveSupabaseConfig() {
+            const url = document.getElementById('cfg-supabase-url').value.trim();
+            const key = document.getElementById('cfg-supabase-key').value.trim();
+
+            if (!url || !key) {
+                alert('Preencha o Project URL e a Anon Public Key.');
+                return;
+            }
+
+            localStorage.setItem(SUPABASE_STORAGE_URL, url);
+            localStorage.setItem(SUPABASE_STORAGE_KEY, key);
+
+            closeConfigModal();
+            await initializeSupabase();
+            alert('Configuração do Supabase guardada!');
+        }
+    </script>
+</body>
+</html>
